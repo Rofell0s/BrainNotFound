@@ -16,6 +16,7 @@ from app.models.interview import (
 from app.models.group import Group
 from app.models.tenant import Tenant
 from app.utils.claude_interviewer import ClaudeInterviewer, get_criteria_templates
+from app.utils import tts_client
 from app.utils.scope import (
     scoped_groups, scoped_interviews,
     validate_group_ids, assign_groups, default_tenant_id, filter_content_status, CONTENT_STATUSES,
@@ -68,6 +69,7 @@ def apply_tts_settings(interview, data):
     mode = data.get('tts_mode', Interview.TTS_OPTIONAL)
     interview.tts_mode = mode if mode in Interview.TTS_MODES else Interview.TTS_OPTIONAL
     interview.tts_voice_hint = data.get('tts_voice_hint', '').strip()[:100] or None
+    interview.tts_server_voice = data.get('tts_server_voice', '').strip()[:100] or None
     try:
         rate = float(data.get('tts_rate', 1.0))
     except (TypeError, ValueError):
@@ -352,8 +354,45 @@ def chat(identifier):
         session=session,
         interview=interview,
         messages=session.messages,
-        tts_on=interview.tts_on_by_default(current_user)
+        tts_on=interview.tts_on_by_default(current_user),
+        server_voice=interview.tts_offered() and tts_client.is_enabled()
     )
+
+
+@interview_bp.route('/session/<identifier>/message/<int:message_id>/audio')
+@login_required
+def message_audio(identifier, message_id):
+    """MP3 of one reply, generated on first request and cached by content.
+
+    The text is already on the page: this only adds the voice, so a provider
+    failure is a 503 the chat quietly falls back from, not a broken interview.
+    """
+    session = InterviewSession.get_by_identifier(identifier)
+    if not session:
+        return jsonify({'error': 'Session introuvable'}), 404
+    if session.user_id != current_user.id and not current_user.is_any_admin:
+        return jsonify({'error': 'Acces non autorise'}), 403
+    if not session.interview.tts_offered():
+        return jsonify({'error': 'Lecture vocale desactivee'}), 404
+
+    message = InterviewMessage.query.filter_by(
+        id=message_id, session_id=session.id, role=InterviewMessage.ROLE_ASSISTANT).first()
+    if not message:
+        return jsonify({'error': 'Message introuvable'}), 404
+
+    from app.utils import tts_cache, tts_client
+    try:
+        path = tts_cache.audio_path(message.content, voice=session.interview.tts_server_voice)
+    except (tts_client.TTSConfigError, tts_client.TTSError) as e:
+        current_app.logger.warning(f'Speech synthesis unavailable for message {message_id}: {e}')
+        return jsonify({'error': 'Synthese vocale indisponible'}), 503
+
+    from flask import send_file
+    # conditional=True gives the browser Range requests, so the player can seek
+    response = send_file(path, mimetype=tts_client.AUDIO_MIME, conditional=True)
+    # One learner's interview: cacheable in their browser, never in a shared proxy
+    response.headers['Cache-Control'] = 'private, max-age=86400'
+    return response
 
 
 @interview_bp.route('/preferences/voice', methods=['POST'])
@@ -1276,6 +1315,7 @@ def admin_export_json(identifier):
         # Voice
         'tts_mode': interview.get_tts_mode(),
         'tts_voice_hint': interview.tts_voice_hint,
+        'tts_server_voice': interview.tts_server_voice,
         'tts_rate': interview.get_tts_rate(),
 
         # File upload
@@ -1390,6 +1430,7 @@ def admin_import():
         apply_tts_settings(interview, {
             'tts_mode': data.get('tts_mode', Interview.TTS_OPTIONAL),
             'tts_voice_hint': data.get('tts_voice_hint') or '',
+            'tts_server_voice': data.get('tts_server_voice') or '',
             'tts_rate': data.get('tts_rate', 1.0),
         })
 

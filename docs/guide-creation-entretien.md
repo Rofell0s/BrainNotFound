@@ -164,10 +164,16 @@ Indices: Reformulations, silences respectueux, questions de clarification,
 
 ### Lecture vocale (optionnel)
 
-Les reponses du personnage peuvent etre lues a voix haute. La synthese se fait dans le
-navigateur de l'apprenant : aucun audio n'est envoye a un service externe ni stocke, et la
-qualite de la voix depend de son systeme (tres bonne sur macOS et iOS, plus mecanique sur
-Windows en francais).
+Les reponses du personnage peuvent etre lues a voix haute. Deux sources possibles, selon ce
+qui est configure dans **Parametres du site > Synthese vocale** :
+
+- **Aucun fournisseur (par defaut)** : la synthese se fait dans le navigateur de
+  l'apprenant. Rien ne quitte l'installation, rien n'est facture, mais la qualite depend de
+  son systeme (tres bonne sur macOS et iOS, plus mecanique sur Windows en francais).
+- **Un fournisseur configure** : le texte de la reponse est envoye au fournisseur, qui
+  renvoie l'audio. Meme voix pour tous les apprenants, facturee aux caracteres. L'audio est
+  mis en cache sur le serveur (par contenu, jamais inclus dans les sauvegardes) et le
+  navigateur reprend la main si le fournisseur est indisponible.
 
 | Mode | Effet |
 |------|-------|
@@ -177,8 +183,13 @@ Windows en francais).
 
 | Champ | Exemple | Role |
 |-------|---------|------|
-| **Voix** | `Thomas`, `fr-CA` | Partie d'un nom de voix ou d'une langue ; vide = la voix de la langue de l'interface |
-| **Vitesse** | `0.9` | De 0,5 (lent) a 1,5 (rapide) |
+| **Voix du navigateur** | `Thomas`, `fr-CA` | Partie d'un nom de voix ou d'une langue ; vide = la voix de la langue de l'interface |
+| **Voix du serveur** | `nova` | Identifiant chez le fournisseur ; vide = la voix par defaut des parametres du site |
+| **Vitesse** | `0.9` | De 0,5 (lent) a 1,5 (rapide), pour les deux sources |
+
+Les deux champs de voix ne parlent pas le meme langage : `Thomas` est un nom de voix
+installee sur la machine de l'apprenant, `nova` un identifiant chez le fournisseur. Remplir
+le mauvais champ ne casse rien, mais la voix choisie sera ignoree.
 
 - Les didascalies entre asterisques (`*elle consulte votre CV*`) ne sont pas lues : elles
   deviennent une pause.

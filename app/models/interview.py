@@ -67,8 +67,11 @@ class Interview(UIDMixin, db.Model):
 
     # Voice reading of the persona's replies (browser speech synthesis)
     tts_mode = db.Column(db.String(10), default=TTS_OPTIONAL)
-    tts_voice_hint = db.Column(db.String(100), nullable=True)  # Part of a voice name or locale: 'Thomas', 'fr-CA'
+    tts_voice_hint = db.Column(db.String(100), nullable=True)  # Browser voice name or locale: 'Thomas', 'fr-CA'
     tts_rate = db.Column(db.Float, default=1.0)  # 0.5 (slow) to 1.5 (fast)
+    # Provider voice id when a server provider is configured ('nova', an ElevenLabs id...):
+    # a different vocabulary from tts_voice_hint, which only a browser understands
+    tts_server_voice = db.Column(db.String(100), nullable=True)
 
     # File upload requirement
     require_file_upload = db.Column(db.Boolean, default=False)

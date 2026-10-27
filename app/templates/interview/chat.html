@@ -293,7 +293,7 @@
         {% endif %}
 
         {% for message in messages %}
-        <div class="message message-{{ message.role }}">
+        <div class="message message-{{ message.role }}" data-message-id="{{ message.id }}">
             <div class="message-content" data-raw="{{ message.content | e }}"></div>
             <div class="message-footer">
                 <span class="message-time">{{ message.created_at|localtime_short }}</span>
@@ -364,8 +364,12 @@ const voice = {
     lang: {{ ('en-US' if get_locale()|string == 'en' else 'fr-FR')|tojson }},
     hint: {{ (interview.tts_voice_hint or '')|tojson }},
     rate: {{ interview.get_tts_rate()|tojson }},
-    prefUrl: {{ url_for('interview.set_voice_preference')|tojson }}
+    prefUrl: {{ url_for('interview.set_voice_preference')|tojson }},
+    // Server synthesis when a provider is configured; the browser voice is the fallback
+    server: {{ server_voice|tojson }},
+    audioUrl: {{ url_for('interview.message_audio', identifier=session.get_url_identifier(), message_id=0)|tojson }}
 };
+let currentAudio = null;
 let voiceOn = false;
 let availableVoices = [];
 
@@ -402,12 +406,18 @@ function speechSupported() {
     return 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function';
 }
 
-function initVoice() {
-    if (!voice.offered || !speechSupported()) return;
+function voiceAvailable() {
+    return voice.offered && (voice.server || speechSupported());
+}
 
-    loadVoices();
-    // Chrome fills the voice list asynchronously
-    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+function initVoice() {
+    if (!voiceAvailable()) return;
+
+    if (speechSupported()) {
+        loadVoices();
+        // Chrome fills the voice list asynchronously
+        window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    }
 
     document.querySelectorAll('.replay-btn').forEach(btn => btn.hidden = false);
     const toggle = document.getElementById('voice-toggle');
@@ -451,8 +461,9 @@ function speakableText(text) {
     return spoken.replace(/\s+/g, ' ').trim();
 }
 
+// Callers gate on voiceOn: a replay may land here after the toggle went back off
 function speak(text) {
-    if (!voiceOn || !speechSupported()) return;
+    if (!speechSupported()) return;
     const spoken = speakableText(text);
     if (!spoken) return;
 
@@ -469,9 +480,47 @@ function speak(text) {
     window.speechSynthesis.speak(utterance);
 }
 
+function playReply(text, messageId) {
+    if (!voiceOn) return;
+    stopSpeaking();
+    // A configured provider sounds far better than a browser voice, but it can be
+    // down, out of quota or misconfigured: the browser voice then takes over.
+    if (voice.server && messageId) {
+        playServerAudio(messageId, () => speak(text));
+    } else {
+        speak(text);
+    }
+}
+
+function playServerAudio(messageId, onFailure) {
+    const element = new Audio(voice.audioUrl.replace(/\/0\/audio$/, '/' + messageId + '/audio'));
+    let failed = false;
+    const giveUp = () => {
+        // Pausing an element rejects its pending play() with AbortError: that is us
+        // replacing it, not the provider failing, and reading the previous reply
+        // over the new one would be worse than no voice at all.
+        if (currentAudio !== element || failed) return;
+        failed = true;
+        markSpeaking(false);
+        onFailure();
+    };
+
+    currentAudio = element;
+    element.playbackRate = voice.rate;
+    element.onplaying = () => markSpeaking(true);
+    element.onended = () => markSpeaking(false);
+    element.onerror = giveUp;
+    element.play().catch(giveUp);
+}
+
 function stopSpeaking() {
-    if (!speechSupported()) return;
-    window.speechSynthesis.cancel();
+    if (currentAudio) {
+        // Drop the handlers first: a discarded element must not touch the UI it no longer owns
+        currentAudio.onplaying = currentAudio.onended = currentAudio.onerror = null;
+        currentAudio.pause();
+        currentAudio = null;
+    }
+    if (speechSupported()) window.speechSynthesis.cancel();
     markSpeaking(false);
 }
 
@@ -513,7 +562,7 @@ function toggleVoice() {
     // Turning it on is a user gesture: a good moment to read the last reply back
     if (turningOn) {
         const last = [...document.querySelectorAll('.message-assistant')].pop();
-        if (last && last.dataset.speak) speak(last.dataset.speak);
+        if (last && last.dataset.speak) playReply(last.dataset.speak, last.dataset.messageId);
     }
 }
 
@@ -522,7 +571,7 @@ function replayMessage(button) {
     if (!message || !message.dataset.speak) return;
     const wasOff = !voiceOn;
     if (wasOff) voiceOn = true;   // an explicit click speaks once, without turning the voice on
-    speak(message.dataset.speak);
+    playReply(message.dataset.speak, message.dataset.messageId);
     if (wasOff) voiceOn = false;
 }
 
@@ -556,8 +605,9 @@ function initWebSocket() {
 
     socket.on('message_received', function(data) {
         document.getElementById('typing-indicator').classList.remove('show');
-        addMessage('assistant', data.content);
-        speak(data.content);
+        addMessage('assistant', data.content, data.message_id);
+        voice.server = !!data.has_audio;   // the admin may have changed provider mid-session
+        playReply(data.content, data.message_id);
         document.getElementById('interaction-count').textContent = data.interaction_count;
         isProcessing = false;
         document.getElementById('send-btn').disabled = false;
@@ -614,7 +664,7 @@ function sendMessage(event) {
     });
 }
 
-function addMessage(role, content) {
+function addMessage(role, content, messageId) {
     const container = document.getElementById('chat-messages');
     const typingIndicator = document.getElementById('typing-indicator');
 
@@ -627,12 +677,13 @@ function addMessage(role, content) {
     const msg = document.createElement('div');
     msg.className = 'message message-' + role;
     msg.dataset.speak = speakableText(content);
+    if (messageId) msg.dataset.messageId = messageId;
 
     const now = new Date();
     const time = now.getHours().toString().padStart(2, '0') + ':' +
                  now.getMinutes().toString().padStart(2, '0');
 
-    const canReplay = role === 'assistant' && voice.offered && speechSupported();
+    const canReplay = role === 'assistant' && voiceAvailable();
     const replay = canReplay
         ? `<button type="button" class="replay-btn" onclick="replayMessage(this)"
                    aria-label="${escapeHtml(i18n.replay)}" data-tooltip="${escapeHtml(i18n.replay)}">

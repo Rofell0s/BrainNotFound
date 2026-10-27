@@ -491,7 +491,7 @@
                         <!-- Voice reading of the persona's replies -->
                         <div class="form-group">
                             <label class="form-label">{{ _('Lecture vocale des reponses du personnage') }}</label>
-                            <div class="grid grid-cols-3 gap-md">
+                            <div class="grid grid-auto gap-md">
                                 <div class="form-group">
                                     <select name="tts_mode" id="tts_mode" class="form-input" onchange="toggleVoiceOptions()">
                                         <option value="optional" {% if not interview or interview.get_tts_mode() == 'optional' %}selected{% endif %}>
@@ -508,7 +508,12 @@
                                 <div class="form-group voice-option">
                                     <input type="text" name="tts_voice_hint" class="form-input" maxlength="100"
                                            value="{% if interview and interview.tts_voice_hint %}{{ interview.tts_voice_hint }}{% endif %}"
-                                           placeholder="{{ _('Voix (ex: Thomas, fr-CA)') }}">
+                                           placeholder="{{ _('Voix du navigateur (ex: Thomas, fr-CA)') }}">
+                                </div>
+                                <div class="form-group voice-option">
+                                    <input type="text" name="tts_server_voice" class="form-input" maxlength="100"
+                                           value="{% if interview and interview.tts_server_voice %}{{ interview.tts_server_voice }}{% endif %}"
+                                           placeholder="{{ _('Voix du serveur (ex: nova)') }}">
                                 </div>
                                 <div class="form-group voice-option">
                                     <input type="number" name="tts_rate" class="form-input" min="0.5" max="1.5" step="0.1"
@@ -517,7 +522,7 @@
                                 </div>
                             </div>
                             <small class="text-light">
-                                {{ _("La voix est celle du navigateur de l'apprenant : aucun audio n'est envoye ni stocke. Laissez la voix vide pour celle de la langue de l'interface ; la vitesse va de 0,5 a 1,5.") }}
+                                {{ _("Sans fournisseur de voix configure dans les parametres du site, la lecture utilise la voix du navigateur de l'apprenant : laissez-la vide pour celle de la langue de l'interface. La voix du serveur ne sert qu'avec un fournisseur, et porte son nom a lui (nova, alloy, un identifiant ElevenLabs...). La vitesse va de 0,5 a 1,5.") }}
                             </small>
                         </div>
 

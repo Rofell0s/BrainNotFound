@@ -46,6 +46,10 @@ def site_settings():
             if error:
                 flash(error, 'error')
 
+            error = save_tts_settings(settings, request.form)
+            if error:
+                flash(error, 'error')
+
             # Backup schedule
             settings.backup_frequency = request.form.get('backup_frequency', 'daily')
             settings.backup_hour = int(request.form.get('backup_hour', 3) or 3)
@@ -63,7 +67,8 @@ def site_settings():
     return render_template('admin/settings.html',
                           settings=settings,
                           next_backup=next_backup,
-                          ai=ai_settings_summary(settings))
+                          ai=ai_settings_summary(settings),
+                          tts=tts_settings_summary(settings))
 
 
 def save_ai_settings(settings, form):
@@ -101,6 +106,97 @@ def save_ai_settings(settings, form):
     # A key belongs to one provider/server: it's dropped when switching, never sent elsewhere
     settings.set_ai_api_key(key)
     return None
+
+
+def save_tts_settings(settings, form):
+    """Apply the speech section of the settings form. Returns an error message or None."""
+    from app.utils import tts_client
+
+    provider = form.get('tts_provider', tts_client.NONE)
+    if provider not in tts_client.PROVIDERS:
+        provider = tts_client.NONE
+
+    base_url = None
+    if provider == tts_client.OPENAI_COMPATIBLE:
+        base_url = form.get('tts_base_url', '').strip()[:255] or None
+    model = form.get('tts_model', '').strip()[:100] or None
+    voice = form.get('tts_voice', '').strip()[:100] or None
+    new_key = form.get('tts_api_key', '').strip()
+
+    if provider == tts_client.OPENAI_COMPATIBLE and not base_url:
+        return _l('URL du fournisseur de voix requise')
+
+    endpoint_changed = (provider != (settings.tts_provider or tts_client.NONE)
+                        or base_url != settings.tts_base_url)
+    key = new_key or (None if endpoint_changed or form.get('clear_tts_api_key') == 'on'
+                      else settings.get_tts_api_key())
+
+    if provider == tts_client.ELEVENLABS and not key:
+        return _l('Cle API requise pour ElevenLabs')
+
+    settings.tts_provider = provider
+    settings.tts_base_url = base_url
+    settings.tts_model = model
+    settings.tts_voice = voice
+    # A key belongs to one provider/server: it's dropped when switching, never sent elsewhere
+    settings.set_tts_api_key(key)
+    return None
+
+
+def tts_settings_summary(settings):
+    """Where the speech config comes from, for display (never the key itself)."""
+    from app.utils import tts_client
+    config = tts_client.get_config()
+    db_key = settings.get_tts_api_key()
+    key = config['api_key']
+    return {
+        'provider': config['provider'],
+        'model': config['model'],
+        'voice': config['voice'],
+        'enabled': tts_client.is_enabled(),
+        'key_source': 'admin' if db_key else ('env' if key else None),
+        'key_hint': f"...{key[-4:]}" if key else None,
+        'key_unreadable': bool(settings.tts_api_key_encrypted and not db_key),
+    }
+
+
+@admin_bp.route('/settings/tts-voices', methods=['POST'])
+@login_required
+@superadmin_required
+def tts_voices():
+    """List a speech provider's voices (typed values or configured ones) - also tests the key."""
+    from app.utils import tts_client
+
+    data = request.get_json(silent=True) or {}
+    provider = data.get('provider') if data.get('provider') in tts_client.PROVIDERS else None
+    try:
+        voices = tts_client.list_voices(provider, data.get('api_key', '').strip() or None,
+                                        data.get('base_url', '').strip() or None)
+    except tts_client.TTSConfigError:
+        return jsonify({'success': False, 'message': str(_l('Configuration incomplete (cle ou URL manquante)'))})
+    except Exception as e:
+        current_app.logger.warning(f'Could not list speech voices: {e}')
+        return jsonify({'success': False, 'message': str(_l('Impossible de joindre le fournisseur de voix'))})
+    return jsonify({'success': True, 'voices': [{'id': v_id, 'name': name} for v_id, name in voices]})
+
+
+@admin_bp.route('/settings/tts-sample', methods=['POST'])
+@login_required
+@superadmin_required
+def tts_sample():
+    """Read one sentence with the saved configuration, so the admin hears it before learners do."""
+    from app.utils import tts_client
+
+    sample = request.form.get('text', '').strip()[:300] or str(
+        _l("Bonjour, installez-vous. Parlez-moi de votre parcours."))
+    try:
+        audio = tts_client.synthesize(sample, voice=request.form.get('voice', '').strip() or None)
+    except (tts_client.TTSConfigError, tts_client.TTSError) as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+    from flask import Response
+    return Response(audio, mimetype=tts_client.AUDIO_MIME,
+                    headers={'Cache-Control': 'no-store'})
 
 
 def ai_settings_summary(settings):
