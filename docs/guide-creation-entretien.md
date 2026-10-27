@@ -181,20 +181,61 @@ qui est configure dans **Parametres du site > Synthese vocale** :
 | **Activee par defaut** | La voix demarre activee : a reserver aux entretiens ou l'oral fait partie de l'exercice |
 | **Desactivee** | Aucun bouton, aucune lecture |
 
-| Champ | Exemple | Role |
-|-------|---------|------|
-| **Voix du navigateur** | `Thomas`, `fr-CA` | Partie d'un nom de voix ou d'une langue ; vide = la voix de la langue de l'interface |
-| **Voix du serveur** | `nova` | Identifiant chez le fournisseur ; vide = la voix par defaut des parametres du site |
-| **Vitesse** | `0.9` | De 0,5 (lent) a 1,5 (rapide), pour les deux sources |
+Quatre reglages, dans cet ordre :
 
-Les deux champs de voix ne parlent pas le meme langage : `Thomas` est un nom de voix
-installee sur la machine de l'apprenant, `nova` un identifiant chez le fournisseur. Remplir
-le mauvais champ ne casse rien, mais la voix choisie sera ignoree.
+| Reglage | Role |
+|---------|------|
+| **Lecture** | Proposee a l'apprenant / Activee par defaut / Desactivee |
+| **Moteur** | La voix du navigateur de l'apprenant, ou celle du fournisseur configure |
+| **Voix** | Liste remplie automatiquement selon le moteur choisi ; « Automatique » convient dans la plupart des cas |
+| **Vitesse** | De 0,5 (lent) a 1,5 (rapide) |
+
+Le **moteur** merite une seconde de reflexion. Avec un fournisseur configure, il est choisi
+par defaut : meme voix pour tous les apprenants, meilleure qualite, facturee aux caracteres.
+Choisir le navigateur garde l'entretien **gratuit**, ce qui est pertinent pour un entretien
+a fort volume ou peu sensible a la qualite de la voix.
+
+Les deux moteurs ne parlent pas le meme langage — `Thomas` est une voix installee sur une
+machine, `nova` un identifiant chez un fournisseur — mais vous n'avez plus a le savoir : la
+liste se remplit toute seule. Votre choix est retenu **pour chaque moteur**, donc basculer
+de l'un a l'autre ne perd rien.
+
+Une limite a connaitre pour le moteur navigateur : la liste affiche les voix installees sur
+**votre** machine, celle de l'apprenant peut en avoir d'autres. « Automatique » evite le
+probleme en prenant la voix de la langue de l'interface.
 
 - Les didascalies entre asterisques (`*elle consulte votre CV*`) ne sont pas lues : elles
   deviennent une pause.
 - L'historique n'est jamais lu a l'ouverture de la page ; l'apprenant peut reecouter un
   message avec le bouton de sa bulle.
+
+### Saisie vocale de l'apprenant (optionnel)
+
+Permet a l'apprenant de **dicter** ses reponses au lieu de les taper. Desactive par
+defaut : la voix de l'apprenant est envoyee a un service de transcription externe, ce qui
+se dit et se consent, pas s'active discretement.
+
+Necessite un fournisseur configure dans **Parametres du site > Saisie vocale des
+apprenants** (Whisper chez OpenAI, ou un serveur local type faster-whisper).
+
+Comment ca se passe pour l'apprenant :
+
+1. Un bouton micro apparait a cote du champ de saisie. **Taper reste toujours
+   possible** : la dictee est un confort, jamais une obligation.
+2. Au premier clic, un encart explique que sa voix sera transmise pour transcription et
+   lui demande son accord. S'il refuse, il tape, et on ne lui redemande rien.
+3. L'accord est enregistre **une fois par entretien**, avec sa date.
+4. Il parle, puis reclique pour arreter (3 minutes maximum par enregistrement).
+5. Le texte reconnu **s'affiche dans le champ de saisie** : il le relit, le corrige si la
+   transcription a mal entendu, et envoie quand il veut.
+
+Ce que vous voyez, vous : dans la relecture d'une session, les reponses dictees portent la
+mention **dictee**. C'est important — une transcription se trompe, et une maladresse
+apparente peut venir de la machine et non de l'apprenant.
+
+**L'enregistrement audio n'est jamais conserve**, ni sur le serveur ni ailleurs. Il est
+transcrit en memoire puis jete ; seul le texte que l'apprenant choisit d'envoyer est
+enregistre, dans son message.
 
 ### Upload de fichier (optionnel)
 

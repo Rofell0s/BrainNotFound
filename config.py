@@ -48,6 +48,12 @@ class Config:
     TTS_API_KEY = os.environ.get('TTS_API_KEY')
     TTS_MODEL = os.environ.get('TTS_MODEL')
     TTS_VOICE = os.environ.get('TTS_VOICE')
+    # Speech recognition fallback (see app/utils/stt_client.py); 'none' = typing only
+    STT_PROVIDER = os.environ.get('STT_PROVIDER')
+    STT_BASE_URL = os.environ.get('STT_BASE_URL')
+    STT_API_KEY = os.environ.get('STT_API_KEY')
+    STT_MODEL = os.environ.get('STT_MODEL')
+
     # Generated audio, keyed by content: a cache, deliberately outside UPLOAD_FOLDER
     # so it never lands in the backups sent to FTP
     TTS_CACHE_DIR = os.environ.get('TTS_CACHE_DIR', 'tts_cache')

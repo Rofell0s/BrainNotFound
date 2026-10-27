@@ -112,7 +112,8 @@ def evaluate_interview_async(app, session_id: int):
             }, room=f'user_{session.user_id}' if session else room)
 
 
-def process_interview_message_async(app, session_id: int, user_content: str, room: str):
+def process_interview_message_async(app, session_id: int, user_content: str, room: str,
+                                    from_voice: bool = False):
     """
     Process a user message and get AI response asynchronously.
 
@@ -145,7 +146,8 @@ def process_interview_message_async(app, session_id: int, user_content: str, roo
                 session_id=session_id,
                 role=InterviewMessage.ROLE_USER,
                 content=user_content,
-                token_count=len(user_content) // 4
+                token_count=len(user_content) // 4,
+                from_voice=from_voice
             )
             db.session.add(user_msg)
             session.interaction_count += 1

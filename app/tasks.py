@@ -84,9 +84,11 @@ def evaluate_interview(session_id):
 
 
 @shared_task(name='app.tasks.interview_reply')
-def interview_reply(session_id, content, room):
+def interview_reply(session_id, content, room, from_voice=False):
+    # from_voice has a default so a task queued before this deploy still runs
     from app.utils.interview_tasks import process_interview_message_async
-    process_interview_message_async(current_app._get_current_object(), session_id, content, room)
+    process_interview_message_async(current_app._get_current_object(), session_id, content, room,
+                                    from_voice)
 
 
 @shared_task(name='app.tasks.send_email')

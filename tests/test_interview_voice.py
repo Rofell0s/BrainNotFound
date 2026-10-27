@@ -136,6 +136,81 @@ def test_the_persona_voice_and_rate_reach_the_page(world, content, login):
     assert 'hint: "Thomas"' in html and 'rate: 0.8' in html
 
 
+def test_the_wizard_offers_one_voice_field_per_engine(world, content, login):
+    """Two free-text fields meant guessing which one applied; now the engine is
+    chosen explicitly and a single list follows it."""
+    interview = content['itw_a']
+    interview.tts_voice_hint = 'Thomas'
+    interview.tts_server_voice = 'nova'
+    db.session.commit()
+
+    client = login(world['dir_a'])
+    html = client.get(f'/interview/admin/interviews/{interview.get_url_identifier()}/edit').get_data(as_text=True)
+
+    assert 'name="tts_source"' in html and 'name="tts_voice"' in html
+    assert 'name="tts_voice_hint"' not in html      # replaced by the single list
+    assert 'name="tts_server_voice"' not in html
+    # Both saved choices travel to the page, so switching engine restores each
+    assert 'data-browser-voice="Thomas"' in html
+    assert 'data-provider-voice="nova"' in html
+
+
+def test_the_engine_decides_which_voice_column_is_written(world, content, login):
+    from app.routes.interview import apply_tts_settings
+
+    interview = content['itw_a']
+    interview.tts_voice_hint = 'Thomas'
+    interview.tts_server_voice = 'nova'
+
+    apply_tts_settings(interview, {'tts_source': 'browser', 'tts_voice': 'Amelie'})
+    assert interview.tts_voice_hint == 'Amelie'
+    assert interview.tts_server_voice == 'nova'     # the other choice is kept
+
+    apply_tts_settings(interview, {'tts_source': 'provider', 'tts_voice': 'onyx'})
+    assert interview.tts_server_voice == 'onyx'
+    assert interview.tts_voice_hint == 'Amelie'
+    assert interview.get_tts_voice() == 'onyx'      # the one in use
+
+
+def test_an_unknown_engine_falls_back_to_the_provider(world, content, login):
+    from app.routes.interview import apply_tts_settings
+
+    interview = content['itw_a']
+    apply_tts_settings(interview, {'tts_source': 'telepathie', 'tts_voice': 'x'})
+    assert interview.get_tts_source() == Interview.TTS_SOURCE_PROVIDER
+    assert interview.uses_provider_voice() is True
+
+
+def test_a_browser_interview_ignores_a_configured_provider(world, content, login):
+    """Choosing the browser engine keeps an interview free of charge on purpose."""
+    from app.models.settings import SiteSettings
+    from app.utils import tts_client
+
+    settings = SiteSettings.get_settings()
+    settings.tts_provider = tts_client.OPENAI_COMPATIBLE
+    settings.tts_base_url = 'https://api.openai.com/v1'
+    settings.set_tts_api_key('sk-test')
+
+    interview, learner = content['itw_a'], world['eleve_3a']
+    interview.tts_source = Interview.TTS_SOURCE_BROWSER
+    session = session_for(interview, learner)
+
+    assert 'server: false' in chat_page(login, learner, session)
+
+    interview.tts_source = Interview.TTS_SOURCE_PROVIDER
+    db.session.commit()
+    assert 'server: true' in chat_page(login, learner, session)
+
+
+def test_the_voice_list_route_is_open_to_interview_admins(world, content, login):
+    """Voice names are not sensitive, and whoever writes an interview picks its voice."""
+    data = login(world['prof_3a']).get('/interview/admin/interviews/provider-voices').get_json()
+    assert data['configured'] is False and data['voices'] == []
+
+    assert login(world['eleve_3a']).get(
+        '/interview/admin/interviews/provider-voices').status_code in (302, 403)
+
+
 def test_the_wizard_exposes_the_voice_settings(world, content, login):
     interview = content['itw_a']
     interview.tts_mode = Interview.TTS_ALWAYS
@@ -147,7 +222,8 @@ def test_the_wizard_exposes_the_voice_settings(world, content, login):
                 f'/interview/admin/interviews/{interview.get_url_identifier()}/edit'):
         html = client.get(url).get_data(as_text=True)
         assert 'name="tts_mode"' in html and 'name="tts_rate"' in html, url
-    assert 'value="Thomas"' in html  # the edit page shows the saved voice
+        assert 'name="tts_source"' in html and 'name="tts_voice"' in html, url
+    assert 'data-browser-voice="Thomas"' in html  # the edit page carries the saved voice
 
 
 def test_the_voice_settings_are_saved_from_the_wizard(world, content, login):
@@ -157,12 +233,15 @@ def test_the_voice_settings_are_saved_from_the_wizard(world, content, login):
         'title': interview.title,
         'system_prompt': 'prompt',
         'tts_mode': 'always',
-        'tts_voice_hint': 'Amelie',
+        'tts_source': 'browser',
+        'tts_voice': 'Amelie',
         'tts_rate': '0.8',
     }, follow_redirects=True)
 
     assert interview.get_tts_mode() == Interview.TTS_ALWAYS
+    assert interview.get_tts_source() == Interview.TTS_SOURCE_BROWSER
     assert interview.tts_voice_hint == 'Amelie'
+    assert interview.get_tts_voice() == 'Amelie'
     assert interview.get_tts_rate() == 0.8
 
 

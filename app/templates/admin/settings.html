@@ -191,6 +191,72 @@
         </div>
     </div>
 
+    <!-- Speech recognition -->
+    <div class="card mb-2">
+        <div class="card-header">
+            <i class="iconoir-microphone"></i> {{ _('Saisie vocale des apprenants') }}
+        </div>
+        <div class="p-2">
+            <p class="text-light text-sm mt-0">
+                {{ _("Permet a l'apprenant de dicter ses reponses au lieu de les taper. Sa voix est envoyee au fournisseur pour etre transcrite : l'enregistrement n'est jamais conserve, seul le texte obtenu l'est, et l'apprenant doit y consentir une fois par entretien. A activer entretien par entretien.") }}
+            </p>
+
+            <div class="form-group">
+                <label for="stt_provider" class="form-label">{{ _('Fournisseur de transcription') }}</label>
+                <select id="stt_provider" name="stt_provider" class="form-input">
+                    <option value="none" {{ 'selected' if stt.provider == 'none' }}>{{ _('Aucun (saisie au clavier uniquement)') }}</option>
+                    <option value="openai_compatible" {{ 'selected' if stt.provider == 'openai_compatible' }}>{{ _('Compatible OpenAI (Whisper, serveur local...)') }}</option>
+                    <option value="elevenlabs" {{ 'selected' if stt.provider == 'elevenlabs' }}>{{ _('ElevenLabs (Scribe)') }}</option>
+                </select>
+            </div>
+
+            <div id="stt-fields" {% if stt.provider == 'none' %}style="display: none;"{% endif %}>
+                <div class="form-group" id="stt-base-url-group" {% if stt.provider != 'openai_compatible' %}style="display: none;"{% endif %}>
+                    <label for="stt_base_url" class="form-label">{{ _('URL du fournisseur') }}</label>
+                    <input type="url" id="stt_base_url" name="stt_base_url" class="form-input" list="stt-base-urls"
+                           value="{{ settings.stt_base_url or '' }}" maxlength="255" placeholder="https://api.openai.com/v1">
+                    <datalist id="stt-base-urls">
+                        <option value="https://api.openai.com/v1">OpenAI Whisper</option>
+                        <option value="http://whisper:9000/v1">{{ _('Serveur local (faster-whisper, whisper.cpp...)') }}</option>
+                    </datalist>
+                    <small class="text-light">{{ _("Changer de fournisseur ou d'URL efface la cle enregistree, pour qu'elle ne soit jamais envoyee a un autre serveur.") }}</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="stt_api_key" class="form-label">{{ _('Cle API') }}</label>
+                    <input type="password" id="stt_api_key" name="stt_api_key" class="form-input"
+                           autocomplete="new-password" placeholder="{{ _('Laisser vide pour ne pas modifier') }}">
+                    <small class="text-light">
+                        {% if stt.key_source == 'admin' %}
+                            {{ _('Cle actuelle : definie ici') }} ({{ stt.key_hint }})
+                        {% elif stt.key_source == 'env' %}
+                            {{ _('Cle actuelle : fichier .env') }} ({{ stt.key_hint }})
+                        {% else %}
+                            {{ _('Aucune cle (normal pour un serveur local)') }}
+                        {% endif %}
+                    </small>
+                    {% if stt.key_unreadable %}
+                    <small class="text-error d-block">{{ _('La cle enregistree ne peut pas etre dechiffree (SECRET_KEY modifiee ?). Saisissez-la a nouveau.') }}</small>
+                    {% endif %}
+                    {% if settings.stt_api_key_encrypted %}
+                    <label class="checkbox-label mt-1">
+                        <input type="checkbox" name="clear_stt_api_key">
+                        <span>{{ _('Supprimer la cle enregistree (revenir au .env)') }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-0">
+                    <label for="stt_model" class="form-label">{{ _('Modele de transcription') }}</label>
+                    <input type="text" id="stt_model" name="stt_model" class="form-input"
+                           value="{{ settings.stt_model or '' }}" maxlength="100"
+                           placeholder="{{ stt.model or 'whisper-1' }}">
+                    <small class="text-light">{{ _('Vide = valeur par defaut du fournisseur') }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom Pages -->
     <div class="card mb-2">
         <div class="card-header flex justify-between items-center">
@@ -492,6 +558,13 @@ document.addEventListener('DOMContentLoaded', function() {
             this.value === 'openai_compatible' ? 'block' : 'none';
         document.getElementById('tts-voice-list').innerHTML = '';
         document.getElementById('tts-result').textContent = '';
+    });
+
+    document.getElementById('stt_provider').addEventListener('change', function() {
+        document.getElementById('stt-fields').style.display = this.value === 'none' ? 'none' : 'block';
+        // ElevenLabs has a fixed endpoint: nothing to type, nothing to get wrong
+        document.getElementById('stt-base-url-group').style.display =
+            this.value === 'openai_compatible' ? 'block' : 'none';
     });
 
     const ttsResult = document.getElementById('tts-result');

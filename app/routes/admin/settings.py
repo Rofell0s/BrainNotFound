@@ -50,6 +50,10 @@ def site_settings():
             if error:
                 flash(error, 'error')
 
+            error = save_stt_settings(settings, request.form)
+            if error:
+                flash(error, 'error')
+
             # Backup schedule
             settings.backup_frequency = request.form.get('backup_frequency', 'daily')
             settings.backup_hour = int(request.form.get('backup_hour', 3) or 3)
@@ -68,7 +72,8 @@ def site_settings():
                           settings=settings,
                           next_backup=next_backup,
                           ai=ai_settings_summary(settings),
-                          tts=tts_settings_summary(settings))
+                          tts=tts_settings_summary(settings),
+                          stt=stt_settings_summary(settings))
 
 
 def save_ai_settings(settings, form):
@@ -157,6 +162,55 @@ def tts_settings_summary(settings):
         'key_source': 'admin' if db_key else ('env' if key else None),
         'key_hint': f"...{key[-4:]}" if key else None,
         'key_unreadable': bool(settings.tts_api_key_encrypted and not db_key),
+    }
+
+
+def save_stt_settings(settings, form):
+    """Apply the transcription section of the settings form. Returns an error or None."""
+    from app.utils import stt_client
+
+    provider = form.get('stt_provider', stt_client.NONE)
+    if provider not in stt_client.PROVIDERS:
+        provider = stt_client.NONE
+
+    base_url = None
+    if provider == stt_client.OPENAI_COMPATIBLE:
+        base_url = form.get('stt_base_url', '').strip()[:255] or None
+    model = form.get('stt_model', '').strip()[:100] or None
+    new_key = form.get('stt_api_key', '').strip()
+
+    if provider == stt_client.OPENAI_COMPATIBLE and not base_url:
+        return _l('URL du fournisseur de transcription requise')
+
+    endpoint_changed = (provider != (settings.stt_provider or stt_client.NONE)
+                        or base_url != settings.stt_base_url)
+    key = new_key or (None if endpoint_changed or form.get('clear_stt_api_key') == 'on'
+                      else settings.get_stt_api_key())
+
+    if provider == stt_client.ELEVENLABS and not key:
+        return _l('Cle API requise pour ElevenLabs')
+
+    settings.stt_provider = provider
+    settings.stt_base_url = base_url
+    settings.stt_model = model
+    # A key belongs to one provider/server: it's dropped when switching, never sent elsewhere
+    settings.set_stt_api_key(key)
+    return None
+
+
+def stt_settings_summary(settings):
+    """Where the transcription config comes from, for display (never the key itself)."""
+    from app.utils import stt_client
+    config = stt_client.get_config()
+    db_key = settings.get_stt_api_key()
+    key = config['api_key']
+    return {
+        'provider': config['provider'],
+        'model': config['model'],
+        'enabled': stt_client.is_enabled(),
+        'key_source': 'admin' if db_key else ('env' if key else None),
+        'key_hint': f"...{key[-4:]}" if key else None,
+        'key_unreadable': bool(settings.stt_api_key_encrypted and not db_key),
     }
 
 
