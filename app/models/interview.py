@@ -26,6 +26,12 @@ class Interview(UIDMixin, db.Model):
     """Interview template configured by admin - defines the AI persona and evaluation criteria."""
     __tablename__ = 'interviews'
 
+    # Voice modes
+    TTS_OFF = 'off'            # No voice at all
+    TTS_OPTIONAL = 'optional'  # The learner turns it on if they want
+    TTS_ALWAYS = 'always'      # On by default: the oral side is the exercise
+    TTS_MODES = (TTS_OFF, TTS_OPTIONAL, TTS_ALWAYS)
+
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(100), unique=True, nullable=True, index=True)  # Coolname-based identifier
     slug = db.Column(db.String(100), unique=True, nullable=True, index=True)
@@ -58,6 +64,11 @@ class Interview(UIDMixin, db.Model):
 
     # Who starts the conversation
     student_starts = db.Column(db.Boolean, default=False)  # False = bot starts, True = student starts
+
+    # Voice reading of the persona's replies (browser speech synthesis)
+    tts_mode = db.Column(db.String(10), default=TTS_OPTIONAL)
+    tts_voice_hint = db.Column(db.String(100), nullable=True)  # Part of a voice name or locale: 'Thomas', 'fr-CA'
+    tts_rate = db.Column(db.Float, default=1.0)  # 0.5 (slow) to 1.5 (fast)
 
     # File upload requirement
     require_file_upload = db.Column(db.Boolean, default=False)
@@ -120,6 +131,30 @@ class Interview(UIDMixin, db.Model):
     def get_max_score(self):
         """Calculate maximum possible score from all criteria."""
         return sum(c.max_points for c in self.criteria)
+
+    def get_tts_mode(self):
+        """Voice mode, falling back to 'optional' for rows written before the column."""
+        return self.tts_mode if self.tts_mode in self.TTS_MODES else self.TTS_OPTIONAL
+
+    def tts_offered(self):
+        """Whether the chat shows the voice button at all."""
+        return self.get_tts_mode() != self.TTS_OFF
+
+    def tts_on_by_default(self, user=None):
+        """Whether the voice starts on: forced by the interview, otherwise the learner's choice."""
+        mode = self.get_tts_mode()
+        if mode == self.TTS_OFF:
+            return False
+        if mode == self.TTS_ALWAYS:
+            return True
+        return bool(user is not None and getattr(user, 'tts_enabled', False))
+
+    def get_tts_rate(self):
+        """Speaking rate, clamped to what browser voices handle without distortion."""
+        try:
+            return min(max(float(self.tts_rate), 0.5), 1.5)
+        except (TypeError, ValueError):
+            return 1.0
 
 
 class EvaluationCriterion(db.Model):

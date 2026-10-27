@@ -154,6 +154,68 @@
     align-items: center;
     gap: 0.5rem;
 }
+.chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.voice-toggle {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 1.1rem;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.voice-toggle:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+.voice-toggle.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+.voice-toggle.speaking i {
+    animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+.message-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+.message-footer .message-time {
+    margin-top: 0;
+}
+.replay-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+.message-assistant:hover .replay-btn,
+.replay-btn:focus {
+    opacity: 0.8;
+}
+.replay-btn:hover {
+    color: var(--primary);
+    opacity: 1;
+}
 .empty-chat-hint {
     text-align: center;
     padding: 2rem;
@@ -205,8 +267,17 @@
             <h2>{{ interview.persona_name or _('Entretien') }}</h2>
             <p>{{ interview.title }}</p>
         </div>
-        <div class="progress-counter">
-            <span id="interaction-count">{{ session.interaction_count }}</span> / {{ interview.max_interactions }} {{ _('echanges') }}
+        <div class="chat-header-actions">
+            {% if interview.tts_offered() %}
+            <button type="button" class="voice-toggle" id="voice-toggle" onclick="toggleVoice()"
+                    aria-pressed="false" aria-label="{{ _('Lire les reponses a voix haute') }}"
+                    data-tooltip="{{ _('Lire les reponses a voix haute') }}" hidden>
+                <i class="iconoir-sound-off" id="voice-icon"></i>
+            </button>
+            {% endif %}
+            <div class="progress-counter">
+                <span id="interaction-count">{{ session.interaction_count }}</span> / {{ interview.max_interactions }} {{ _('echanges') }}
+            </div>
         </div>
     </div>
 
@@ -224,7 +295,15 @@
         {% for message in messages %}
         <div class="message message-{{ message.role }}">
             <div class="message-content" data-raw="{{ message.content | e }}"></div>
-            <div class="message-time">{{ message.created_at|localtime_short }}</div>
+            <div class="message-footer">
+                <span class="message-time">{{ message.created_at|localtime_short }}</span>
+                {% if message.role == 'assistant' and interview.tts_offered() %}
+                <button type="button" class="replay-btn" onclick="replayMessage(this)" hidden
+                        aria-label="{{ _('Reecouter ce message') }}" data-tooltip="{{ _('Reecouter') }}">
+                    <i class="iconoir-sound-high"></i>
+                </button>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
 
@@ -270,14 +349,33 @@ const i18n = {
     endInterviewConfirm: {{ _("Terminer l'entretien ? Vous ne pourrez plus envoyer de messages.")|tojson }},
     interviewEndedTitle: {{ _('Entretien termine')|tojson }},
     interviewEndedDefault: {{ _("L'entretien est maintenant termine.")|tojson }},
-    goToAnalysis: {{ _("Passer a l'analyse et la correction")|tojson }}
+    goToAnalysis: {{ _("Passer a l'analyse et la correction")|tojson }},
+    voiceOn: {{ _('Couper la lecture vocale')|tojson }},
+    voiceOff: {{ _('Lire les reponses a voix haute')|tojson }},
+    replay: {{ _('Reecouter')|tojson }}
 };
+
+// Voice reading runs entirely in the browser (Web Speech API): nothing is sent or stored.
+const voice = {
+    offered: {{ interview.tts_offered()|tojson }},
+    startOn: {{ tts_on|tojson }},
+    // 'always' is the interview's call, so a learner muting it here is not saved as their preference
+    persist: {{ (interview.get_tts_mode() == interview.TTS_OPTIONAL)|tojson }},
+    lang: {{ ('en-US' if get_locale()|string == 'en' else 'fr-FR')|tojson }},
+    hint: {{ (interview.tts_voice_hint or '')|tojson }},
+    rate: {{ interview.get_tts_rate()|tojson }},
+    prefUrl: {{ url_for('interview.set_voice_preference')|tojson }}
+};
+let voiceOn = false;
+let availableVoices = [];
+
 let socket;
 let isProcessing = false;
 
 document.addEventListener('DOMContentLoaded', function() {
-    initWebSocket();
     formatExistingMessages();
+    initVoice();      // before the socket: a CDN that fails to load must not cost the voice
+    initWebSocket();
     scrollToBottom();
 
     // Auto-resize textarea
@@ -293,8 +391,139 @@ function formatExistingMessages() {
     document.querySelectorAll('.message-content[data-raw]').forEach(el => {
         const rawContent = el.dataset.raw;
         el.innerHTML = formatMessage(rawContent, true);
+        el.closest('.message').dataset.speak = speakableText(unescapeHtml(rawContent));
         el.removeAttribute('data-raw');
     });
+}
+
+// ==================== Voice (Web Speech API) ====================
+
+function speechSupported() {
+    return 'speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function';
+}
+
+function initVoice() {
+    if (!voice.offered || !speechSupported()) return;
+
+    loadVoices();
+    // Chrome fills the voice list asynchronously
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+
+    document.querySelectorAll('.replay-btn').forEach(btn => btn.hidden = false);
+    const toggle = document.getElementById('voice-toggle');
+    if (toggle) toggle.hidden = false;
+
+    // We never speak the history on load: browsers block audio before a gesture,
+    // and nobody wants a page to start talking by itself.
+    setVoiceOn(voice.startOn, false);
+
+    window.addEventListener('beforeunload', stopSpeaking);
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) stopSpeaking();
+    });
+}
+
+function loadVoices() {
+    availableVoices = window.speechSynthesis.getVoices() || [];
+}
+
+function pickVoice() {
+    if (!availableVoices.length) return null;
+    const hint = voice.hint.trim().toLowerCase();
+    if (hint) {
+        const match = availableVoices.find(v => v.name.toLowerCase().includes(hint)
+                                             || v.lang.toLowerCase().includes(hint));
+        if (match) return match;
+    }
+    const wanted = voice.lang.toLowerCase();
+    const base = wanted.slice(0, 2);
+    const normalize = v => v.lang.toLowerCase().replace('_', '-');
+    return availableVoices.find(v => normalize(v) === wanted)
+        || availableVoices.find(v => normalize(v).startsWith(base))
+        || null;
+}
+
+function speakableText(text) {
+    // *Didascalies* are staging directions, not speech: a pause reads better than "soupire"
+    let spoken = text.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '. ');
+    spoken = spoken.replace(/\s*\n+\s*/g, '. ');       // line breaks become sentence breaks
+    spoken = spoken.replace(/(\.\s*){2,}/g, '. ');     // collapse the dots we just piled up
+    return spoken.replace(/\s+/g, ' ').trim();
+}
+
+function speak(text) {
+    if (!voiceOn || !speechSupported()) return;
+    const spoken = speakableText(text);
+    if (!spoken) return;
+
+    window.speechSynthesis.cancel();  // a new reply interrupts the previous one
+
+    const utterance = new SpeechSynthesisUtterance(spoken);
+    const picked = pickVoice();
+    if (picked) utterance.voice = picked;
+    utterance.lang = picked ? picked.lang : voice.lang;
+    utterance.rate = voice.rate;
+    utterance.onstart = () => markSpeaking(true);
+    utterance.onend = () => markSpeaking(false);
+    utterance.onerror = () => markSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+}
+
+function stopSpeaking() {
+    if (!speechSupported()) return;
+    window.speechSynthesis.cancel();
+    markSpeaking(false);
+}
+
+function markSpeaking(speaking) {
+    const toggle = document.getElementById('voice-toggle');
+    if (toggle) toggle.classList.toggle('speaking', speaking);
+}
+
+function setVoiceOn(on, save) {
+    voiceOn = on;
+    const toggle = document.getElementById('voice-toggle');
+    if (toggle) {
+        toggle.classList.toggle('active', on);
+        toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+        const label = on ? i18n.voiceOn : i18n.voiceOff;
+        toggle.setAttribute('aria-label', label);
+        toggle.setAttribute('data-tooltip', label);
+        document.getElementById('voice-icon').className = on ? 'iconoir-sound-high' : 'iconoir-sound-off';
+    }
+    if (!on) stopSpeaking();
+    if (save && voice.persist) saveVoicePreference(on);
+}
+
+function saveVoicePreference(on) {
+    // Best effort: the voice works for this session even if the preference is not stored
+    fetch(voice.prefUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ enabled: on })
+    }).catch(() => {});
+}
+
+function toggleVoice() {
+    const turningOn = !voiceOn;
+    setVoiceOn(turningOn, true);
+    // Turning it on is a user gesture: a good moment to read the last reply back
+    if (turningOn) {
+        const last = [...document.querySelectorAll('.message-assistant')].pop();
+        if (last && last.dataset.speak) speak(last.dataset.speak);
+    }
+}
+
+function replayMessage(button) {
+    const message = button.closest('.message');
+    if (!message || !message.dataset.speak) return;
+    const wasOff = !voiceOn;
+    if (wasOff) voiceOn = true;   // an explicit click speaks once, without turning the voice on
+    speak(message.dataset.speak);
+    if (wasOff) voiceOn = false;
 }
 
 function handleKeyDown(event) {
@@ -328,6 +557,7 @@ function initWebSocket() {
     socket.on('message_received', function(data) {
         document.getElementById('typing-indicator').classList.remove('show');
         addMessage('assistant', data.content);
+        speak(data.content);
         document.getElementById('interaction-count').textContent = data.interaction_count;
         isProcessing = false;
         document.getElementById('send-btn').disabled = false;
@@ -396,14 +626,26 @@ function addMessage(role, content) {
 
     const msg = document.createElement('div');
     msg.className = 'message message-' + role;
+    msg.dataset.speak = speakableText(content);
 
     const now = new Date();
     const time = now.getHours().toString().padStart(2, '0') + ':' +
                  now.getMinutes().toString().padStart(2, '0');
 
+    const canReplay = role === 'assistant' && voice.offered && speechSupported();
+    const replay = canReplay
+        ? `<button type="button" class="replay-btn" onclick="replayMessage(this)"
+                   aria-label="${escapeHtml(i18n.replay)}" data-tooltip="${escapeHtml(i18n.replay)}">
+               <i class="iconoir-sound-high"></i>
+           </button>`
+        : '';
+
     msg.innerHTML = `
         <div class="message-content">${formatMessage(content)}</div>
-        <div class="message-time">${time}</div>
+        <div class="message-footer">
+            <span class="message-time">${time}</span>
+            ${replay}
+        </div>
     `;
 
     container.insertBefore(msg, typingIndicator);
@@ -449,6 +691,12 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function unescapeHtml(html) {
+    const area = document.createElement('textarea');
+    area.innerHTML = html;
+    return area.value;
 }
 
 function formatMessage(text, alreadyEscaped = false) {

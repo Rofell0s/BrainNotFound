@@ -63,6 +63,18 @@ def admin_required(f):
     return decorated_function
 
 
+def apply_tts_settings(interview, data):
+    """Read the voice settings off the wizard form onto an interview."""
+    mode = data.get('tts_mode', Interview.TTS_OPTIONAL)
+    interview.tts_mode = mode if mode in Interview.TTS_MODES else Interview.TTS_OPTIONAL
+    interview.tts_voice_hint = data.get('tts_voice_hint', '').strip()[:100] or None
+    try:
+        rate = float(data.get('tts_rate', 1.0))
+    except (TypeError, ValueError):
+        rate = 1.0
+    interview.tts_rate = min(max(rate, 0.5), 1.5)
+
+
 def get_admin_groups():
     """Active groups in the current admin's scope."""
     return scoped_groups().all()
@@ -339,8 +351,19 @@ def chat(identifier):
         'interview/chat.html',
         session=session,
         interview=interview,
-        messages=session.messages
+        messages=session.messages,
+        tts_on=interview.tts_on_by_default(current_user)
     )
+
+
+@interview_bp.route('/preferences/voice', methods=['POST'])
+@login_required
+def set_voice_preference():
+    """Remember the learner's voice choice so it follows them to their next device."""
+    enabled = bool((request.get_json(silent=True) or {}).get('enabled'))
+    current_user.tts_enabled = enabled
+    db.session.commit()
+    return jsonify({'success': True, 'enabled': enabled})
 
 
 @interview_bp.route('/session/<identifier>/end', methods=['POST'])
@@ -595,6 +618,7 @@ def admin_create():
             created_by_id=current_user.id,
             tenant_id=default_tenant_id(selected_groups)
         )
+        apply_tts_settings(interview, data)
         db.session.add(interview)
         db.session.flush()
 
@@ -729,6 +753,7 @@ def admin_edit(identifier):
         interview.file_upload_label = data.get('file_upload_label', 'Fichier').strip()
         interview.file_upload_description = data.get('file_upload_description', '').strip()
         interview.file_upload_prompt_injection = data.get('file_upload_prompt_injection', '').strip()
+        apply_tts_settings(interview, data)
 
         # Handle slug
         new_slug = data.get('slug', '').strip() or None
@@ -1248,6 +1273,11 @@ def admin_export_json(identifier):
         'student_starts': interview.student_starts,
         'opening_message': interview.opening_message,
 
+        # Voice
+        'tts_mode': interview.get_tts_mode(),
+        'tts_voice_hint': interview.tts_voice_hint,
+        'tts_rate': interview.get_tts_rate(),
+
         # File upload
         'require_file_upload': interview.require_file_upload,
         'file_upload_label': interview.file_upload_label,
@@ -1355,6 +1385,13 @@ def admin_import():
             tenant_id=default_tenant_id(),
             created_by_id=current_user.id
         )
+
+        # Voice (absent from exports made before the feature: 'optional' then)
+        apply_tts_settings(interview, {
+            'tts_mode': data.get('tts_mode', Interview.TTS_OPTIONAL),
+            'tts_voice_hint': data.get('tts_voice_hint') or '',
+            'tts_rate': data.get('tts_rate', 1.0),
+        })
 
         db.session.add(interview)
         db.session.flush()  # Get the interview ID

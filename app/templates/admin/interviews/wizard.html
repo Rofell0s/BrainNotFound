@@ -488,6 +488,41 @@
 
                         <hr class="my-lg">
 
+                        <!-- Voice reading of the persona's replies -->
+                        <div class="form-group">
+                            <label class="form-label">{{ _('Lecture vocale des reponses du personnage') }}</label>
+                            <div class="grid grid-cols-3 gap-md">
+                                <div class="form-group">
+                                    <select name="tts_mode" id="tts_mode" class="form-input" onchange="toggleVoiceOptions()">
+                                        <option value="optional" {% if not interview or interview.get_tts_mode() == 'optional' %}selected{% endif %}>
+                                            {{ _("Proposee a l'apprenant") }}
+                                        </option>
+                                        <option value="always" {% if interview and interview.get_tts_mode() == 'always' %}selected{% endif %}>
+                                            {{ _('Activee par defaut') }}
+                                        </option>
+                                        <option value="off" {% if interview and interview.get_tts_mode() == 'off' %}selected{% endif %}>
+                                            {{ _('Desactivee') }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group voice-option">
+                                    <input type="text" name="tts_voice_hint" class="form-input" maxlength="100"
+                                           value="{% if interview and interview.tts_voice_hint %}{{ interview.tts_voice_hint }}{% endif %}"
+                                           placeholder="{{ _('Voix (ex: Thomas, fr-CA)') }}">
+                                </div>
+                                <div class="form-group voice-option">
+                                    <input type="number" name="tts_rate" class="form-input" min="0.5" max="1.5" step="0.1"
+                                           value="{% if interview %}{{ interview.get_tts_rate() }}{% else %}1.0{% endif %}"
+                                           placeholder="{{ _('Vitesse') }}">
+                                </div>
+                            </div>
+                            <small class="text-light">
+                                {{ _("La voix est celle du navigateur de l'apprenant : aucun audio n'est envoye ni stocke. Laissez la voix vide pour celle de la langue de l'interface ; la vitesse va de 0,5 a 1,5.") }}
+                            </small>
+                        </div>
+
+                        <hr class="my-lg">
+
                         <!-- File upload configuration -->
                         <div class="form-group">
                             <label class="check-item">
@@ -593,6 +628,7 @@ let creationMode = editMode ? 'wizard' : null; // 'direct' or 'wizard'
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     renderCriteria();
+    toggleVoiceOptions();
     if (editMode) {
         updateNavButtons();
     }
@@ -887,6 +923,13 @@ function toggleFileUploadOptions() {
     const checkbox = document.getElementById('require_file_upload');
     const options = document.getElementById('file-upload-options');
     options.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+function toggleVoiceOptions() {
+    const off = document.getElementById('tts_mode').value === 'off';
+    document.querySelectorAll('.voice-option').forEach(el => {
+        el.style.display = off ? 'none' : '';
+    });
 }
 </script>
 {% endblock %}

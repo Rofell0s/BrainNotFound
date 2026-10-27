@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BrainNotFound 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 15:34+0200\n"
+"POT-Creation-Date: 2026-10-27 09:02+0100\n"
 "PO-Revision-Date: 2026-01-27 00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: en <LL@li.org>\n"
@@ -200,158 +200,158 @@ msgid "Une erreur est survenue lors de la suppression du compte."
 msgstr "An error occurred while deleting the account."
 
 #: app/routes/admin/common.py:68 app/routes/interview.py:60
-#: app/routes/interview.py:327 app/routes/interview.py:387
-#: app/routes/interview.py:413 app/routes/interview.py:442
+#: app/routes/interview.py:339 app/routes/interview.py:410
+#: app/routes/interview.py:436 app/routes/interview.py:465
 #: app/routes/quiz.py:634 app/routes/quiz.py:661 app/routes/quiz.py:700
 #: app/routes/tenant.py:39 app/routes/tenant.py:162
 msgid "Acces non autorise"
 msgstr "Access denied"
 
-#: app/routes/interview.py:142 app/routes/interview.py:153
-#: app/routes/interview.py:643 app/routes/interview.py:685
-#: app/routes/interview.py:814 app/routes/interview.py:833
-#: app/routes/interview.py:891 app/routes/interview.py:931
-#: app/routes/interview.py:977 app/routes/interview.py:1045
-#: app/routes/interview.py:1065 app/routes/interview.py:1098
-#: app/routes/interview.py:1208
+#: app/routes/interview.py:154 app/routes/interview.py:165
+#: app/routes/interview.py:667 app/routes/interview.py:709
+#: app/routes/interview.py:839 app/routes/interview.py:858
+#: app/routes/interview.py:916 app/routes/interview.py:956
+#: app/routes/interview.py:1002 app/routes/interview.py:1070
+#: app/routes/interview.py:1090 app/routes/interview.py:1123
+#: app/routes/interview.py:1233
 msgid "Entretien introuvable"
 msgstr "Interview not found"
 
-#: app/routes/interview.py:164
+#: app/routes/interview.py:176
 msgid "Cet entretien n'est pas disponible actuellement"
 msgstr "This interview is not currently available"
 
-#: app/routes/interview.py:169 app/routes/interview.py:647
-#: app/routes/interview.py:689 app/routes/interview.py:818
-#: app/routes/interview.py:837 app/routes/interview.py:895
-#: app/routes/interview.py:935 app/routes/interview.py:981
-#: app/routes/interview.py:1049 app/routes/interview.py:1069
-#: app/routes/interview.py:1104 app/routes/interview.py:1214
+#: app/routes/interview.py:181 app/routes/interview.py:671
+#: app/routes/interview.py:713 app/routes/interview.py:843
+#: app/routes/interview.py:862 app/routes/interview.py:920
+#: app/routes/interview.py:960 app/routes/interview.py:1006
+#: app/routes/interview.py:1074 app/routes/interview.py:1094
+#: app/routes/interview.py:1129 app/routes/interview.py:1239
 msgid "Vous n'avez pas acces a cet entretien"
 msgstr "You do not have access to this interview"
 
-#: app/routes/interview.py:184
+#: app/routes/interview.py:196
 msgid "Vous avez deja complete cet entretien"
 msgstr "You have already completed this interview"
 
-#: app/routes/interview.py:195
+#: app/routes/interview.py:207
 msgid ""
 "Quota d'entretiens IA atteint pour ce mois. Contactez votre administrateur."
 msgstr ""
 "AI interview quota reached for this month. Contact your administrator."
 
-#: app/routes/interview.py:204 app/routes/interview.py:1004
+#: app/routes/interview.py:216 app/routes/interview.py:1029
 msgid "Veuillez telecharger un fichier"
 msgstr "Please upload a file"
 
-#: app/routes/interview.py:211 app/routes/interview.py:1011
+#: app/routes/interview.py:223 app/routes/interview.py:1036
 msgid "Impossible de lire le contenu du fichier"
 msgstr "Unable to read file content"
 
-#: app/routes/interview.py:215 app/routes/interview.py:1015
+#: app/routes/interview.py:227 app/routes/interview.py:1040
 msgid "Erreur lors de la lecture du fichier"
 msgstr "Error reading file"
 
-#: app/routes/interview.py:318 app/routes/interview.py:379
-#: app/routes/interview.py:405 app/routes/interview.py:433
+#: app/routes/interview.py:330 app/routes/interview.py:402
+#: app/routes/interview.py:428 app/routes/interview.py:456
 msgid "Session introuvable"
 msgstr "Session not found"
 
-#: app/routes/interview.py:447
+#: app/routes/interview.py:470
 msgid "Entretien non termine"
 msgstr "Interview not completed"
 
-#: app/routes/interview.py:469 app/routes/interview.py:966
+#: app/routes/interview.py:492 app/routes/interview.py:991
 msgid "Erreur lors de la generation du PDF"
 msgstr "Error generating PDF"
 
 #: app/routes/admin/pages.py:39 app/routes/admin/pages.py:103
-#: app/routes/interview.py:538
+#: app/routes/interview.py:561
 msgid "Le titre est requis"
 msgstr "Title is required"
 
-#: app/routes/interview.py:542
+#: app/routes/interview.py:565
 msgid "Le prompt systeme est requis"
 msgstr "System prompt is required"
 
-#: app/routes/interview.py:554 app/routes/interview.py:739
+#: app/routes/interview.py:577 app/routes/interview.py:764
 #: app/routes/tenant.py:102
 msgid "Ce slug est deja utilise"
 msgstr "This slug is already in use"
 
-#: app/routes/interview.py:622
+#: app/routes/interview.py:646
 msgid "Entretien cree avec succes"
 msgstr "Interview created successfully"
 
-#: app/routes/interview.py:778
+#: app/routes/interview.py:803
 msgid "Entretien mis a jour"
 msgstr "Interview updated"
 
-#: app/routes/interview.py:822
+#: app/routes/interview.py:847
 msgid "Entretien supprime"
 msgstr "Interview deleted"
 
-#: app/routes/interview.py:842 app/routes/interview.py:846
-#: app/routes/interview.py:900 app/routes/interview.py:904
-#: app/routes/interview.py:940 app/routes/interview.py:944
-#: app/routes/interview.py:1074 app/routes/interview.py:1078
+#: app/routes/interview.py:867 app/routes/interview.py:871
+#: app/routes/interview.py:925 app/routes/interview.py:929
+#: app/routes/interview.py:965 app/routes/interview.py:969
+#: app/routes/interview.py:1099 app/routes/interview.py:1103
 msgid "Session non trouvee"
 msgstr "Session not found"
 
-#: app/routes/interview.py:880
+#: app/routes/interview.py:905
 msgid "Commentaire enregistre"
 msgstr "Comment saved"
 
-#: app/routes/interview.py:920
+#: app/routes/interview.py:945
 msgid ""
 "Re-evaluation lancee. Veuillez patienter quelques secondes puis rafraichir "
 "la page."
 msgstr ""
 "Re-evaluation started. Please wait a few seconds then refresh the page."
 
-#: app/routes/interview.py:1026 app/routes/interview.py:1034
+#: app/routes/interview.py:1051 app/routes/interview.py:1059
 msgid "Session de test demarree"
 msgstr "Test session started"
 
-#: app/routes/interview.py:1053
+#: app/routes/interview.py:1078
 msgid "active"
 msgstr "activated"
 
-#: app/routes/interview.py:1053
+#: app/routes/interview.py:1078
 msgid "desactive"
 msgstr "deactivated"
 
-#: app/routes/interview.py:1054
+#: app/routes/interview.py:1079
 #, python-format
 msgid "Entretien %(status)s"
 msgstr "Interview %(status)s"
 
-#: app/routes/interview.py:1083
+#: app/routes/interview.py:1108
 msgid "Session supprimee"
 msgstr "Session deleted"
 
-#: app/routes/interview.py:1291 app/routes/interview.py:1296
+#: app/routes/interview.py:1321 app/routes/interview.py:1326
 msgid "Aucun fichier selectionne."
 msgstr "No file selected."
 
-#: app/routes/interview.py:1300
+#: app/routes/interview.py:1330
 msgid "Le fichier doit etre au format JSON."
 msgstr "File must be in JSON format."
 
-#: app/routes/interview.py:1309
+#: app/routes/interview.py:1339
 msgid "Format de fichier invalide."
 msgstr "Invalid file format."
 
-#: app/routes/interview.py:1376
+#: app/routes/interview.py:1413
 #, python-format
 msgid "Entretien \"%(title)s\" importe avec succes ! Il est inactif par defaut."
 msgstr "Interview \"%(title)s\" imported successfully! It is inactive by default."
 
-#: app/routes/interview.py:1380
+#: app/routes/interview.py:1417
 msgid "Erreur de lecture du fichier JSON."
 msgstr "Error reading JSON file."
 
-#: app/routes/admin/users.py:490 app/routes/interview.py:1385
+#: app/routes/admin/users.py:490 app/routes/interview.py:1422
 #, python-format
 msgid "Erreur lors de l'import: %(error)s"
 msgstr "Import error: %(error)s"
@@ -1309,7 +1309,7 @@ msgid "Chargement..."
 msgstr "Loading..."
 
 #: app/templates/admin/_markdown_preview.html:23
-#, python-brace-format, python-format
+#, python-brace-format
 msgid "{count} question(s), {points} point(s)"
 msgstr "{count} question(s), {points} point(s)"
 
@@ -1439,7 +1439,7 @@ msgstr "Role in the group"
 #: app/templates/admin/_user_roles.html:64
 #: app/templates/admin/class_analysis.html:413
 #: app/templates/admin/interviews/session.html:133
-#: app/templates/admin/interviews/view.html:180
+#: app/templates/admin/interviews/view.html:192
 #: app/templates/admin/quiz_results.html:95
 #: app/templates/admin/user_detail.html:22
 #: app/templates/admin/user_detail.html:202 app/templates/admin/users.html:17
@@ -1592,7 +1592,7 @@ msgid "Question"
 msgstr "Question"
 
 #: app/templates/admin/class_analysis.html:372
-#: app/templates/admin/interviews/view.html:134
+#: app/templates/admin/interviews/view.html:146
 #: app/templates/interview/result_pdf.html:181
 msgid "Points"
 msgstr "Points"
@@ -1623,7 +1623,7 @@ msgstr "Learner comparison"
 #: app/templates/admin/class_analysis.html:414
 #: app/templates/admin/edit_response.html:137
 #: app/templates/admin/interviews/session.html:98
-#: app/templates/admin/interviews/view.html:184
+#: app/templates/admin/interviews/view.html:196
 #: app/templates/admin/quiz_results.html:97
 #: app/templates/admin/response_analysis.html:247
 #: app/templates/admin/response_analysis.html:349
@@ -1636,7 +1636,7 @@ msgstr "Score"
 
 #: app/templates/admin/class_analysis.html:415
 #: app/templates/admin/interviews/session.html:102
-#: app/templates/admin/interviews/view.html:182
+#: app/templates/admin/interviews/view.html:194
 #: app/templates/admin/user_detail.html:90
 msgid "Duree"
 msgstr "Duration"
@@ -1663,7 +1663,7 @@ msgstr "Analysis in progress..."
 #: app/templates/admin/class_analysis.html:486
 #: app/templates/admin/create_quiz.html:324
 #: app/templates/admin/edit_quiz.html:332
-#: app/templates/admin/interviews/wizard.html:863
+#: app/templates/admin/interviews/wizard.html:899
 #: app/templates/admin/response_analysis.html:486
 #: app/templates/admin/settings.html:460 app/templates/admin/settings.html:492
 #: app/templates/admin/settings.html:529 app/templates/admin/settings.html:552
@@ -1680,7 +1680,7 @@ msgstr "Unknown error"
 #: app/templates/admin/create_quiz.html:328
 #: app/templates/admin/edit_quiz.html:336
 #: app/templates/admin/response_analysis.html:491
-#: app/templates/interview/chat.html:269
+#: app/templates/interview/chat.html:348
 msgid "Erreur de connexion"
 msgstr "Connection error"
 
@@ -1725,7 +1725,7 @@ msgstr "Ex: Master 2024-2025, License Info L3, Promo 2024..."
 #: app/templates/admin/create_group.html:27
 #: app/templates/admin/edit_group.html:32
 #: app/templates/admin/interviews/wizard.html:248
-#: app/templates/admin/interviews/wizard.html:748
+#: app/templates/admin/interviews/wizard.html:784
 #: app/templates/admin/tenants/create.html:32
 #: app/templates/admin/tenants/edit.html:25
 msgid "Description"
@@ -1855,7 +1855,7 @@ msgstr "Availability period (optional)"
 #: app/templates/admin/create_quiz.html:94
 #: app/templates/admin/edit_quiz.html:77
 #: app/templates/admin/generate_quiz_preview.html:90
-#: app/templates/admin/interviews/view.html:106
+#: app/templates/admin/interviews/view.html:118
 #: app/templates/admin/quizzes.html:46
 msgid "Du"
 msgstr "Of"
@@ -1863,7 +1863,7 @@ msgstr "Of"
 #: app/templates/admin/create_quiz.html:99
 #: app/templates/admin/edit_quiz.html:83
 #: app/templates/admin/generate_quiz_preview.html:95
-#: app/templates/admin/interviews/view.html:107
+#: app/templates/admin/interviews/view.html:119
 #: app/templates/admin/quizzes.html:49
 msgid "au"
 msgstr "At"
@@ -2045,7 +2045,7 @@ msgid "Prenom"
 msgstr "First name"
 
 #: app/templates/admin/create_user.html:17
-#: app/templates/admin/interviews/wizard.html:743
+#: app/templates/admin/interviews/wizard.html:779
 #: app/templates/admin/user_detail.html:234 app/templates/auth/profile.html:23
 #: app/templates/auth/register.html:18
 msgid "Nom"
@@ -2142,7 +2142,7 @@ msgstr "a pass"
 
 #: app/templates/admin/dashboard.html:103
 #: app/templates/admin/interviews/session.html:113
-#: app/templates/admin/interviews/view.html:219
+#: app/templates/admin/interviews/view.html:231
 #: app/templates/admin/user_detail.html:157
 #: app/templates/quiz/dashboard.html:239
 msgid "En cours"
@@ -2150,7 +2150,7 @@ msgstr "In progress"
 
 #: app/templates/admin/dashboard.html:105
 #: app/templates/admin/interviews/session.html:115
-#: app/templates/admin/interviews/view.html:221
+#: app/templates/admin/interviews/view.html:233
 #: app/templates/admin/user_detail.html:159
 #: app/templates/quiz/dashboard.html:241
 msgid "Evaluation"
@@ -2215,7 +2215,7 @@ msgstr "Currently :"
 #: app/templates/admin/edit_quiz.html:258
 #: app/templates/admin/edit_response.html:169
 #: app/templates/admin/interviews/session.html:270
-#: app/templates/admin/interviews/wizard.html:568
+#: app/templates/admin/interviews/wizard.html:603
 #: app/templates/admin/tenants/edit.html:167
 #: app/templates/admin/user_detail.html:286 app/templates/auth/profile.html:34
 msgid "Enregistrer"
@@ -2718,7 +2718,7 @@ msgid "Generer le quiz"
 msgstr "Generate the quiz"
 
 #: app/templates/admin/generate_quiz.html:95
-#: app/templates/admin/interviews/wizard.html:578
+#: app/templates/admin/interviews/wizard.html:613
 msgid "Generation en cours..."
 msgstr "Generation in progress..."
 
@@ -2976,7 +2976,7 @@ msgstr "Complete quizzes"
 #: app/templates/admin/group_detail.html:223
 #: app/templates/admin/group_detail.html:259
 #: app/templates/admin/groups.html:40
-#: app/templates/admin/interviews/view.html:186
+#: app/templates/admin/interviews/view.html:198
 #: app/templates/admin/pages.html:23 app/templates/admin/quiz_results.html:103
 #: app/templates/admin/tenants/view.html:94
 #: app/templates/admin/tenants/view.html:149
@@ -3170,7 +3170,7 @@ msgstr "this group"
 
 #: app/templates/admin/groups.html:88
 #: app/templates/admin/interviews/list.html:99
-#: app/templates/admin/interviews/view.html:234
+#: app/templates/admin/interviews/view.html:246
 #: app/templates/admin/pages.html:72 app/templates/admin/quiz_results.html:214
 #: app/templates/admin/quizzes.html:98
 #: app/templates/admin/tenants/delete.html:3
@@ -3315,7 +3315,7 @@ msgstr "Order"
 
 #: app/templates/admin/interviews/session.html:120
 #: app/templates/admin/interviews/view.html:57
-#: app/templates/admin/interviews/view.html:185
+#: app/templates/admin/interviews/view.html:197
 #: app/templates/admin/interviews/wizard.html:452
 #: app/templates/admin/pages.html:22 app/templates/admin/settings.html:257
 #: app/templates/admin/user_detail.html:91
@@ -3554,7 +3554,7 @@ msgstr "Re-correct the open questions"
 msgid "Re-corriger"
 msgstr "Re-correct"
 
-#: app/templates/admin/interviews/view.html:170
+#: app/templates/admin/interviews/view.html:182
 #: app/templates/admin/quiz_results.html:84
 msgid "Telecharger les resultats"
 msgstr "Download the results"
@@ -3685,7 +3685,7 @@ msgid "par"
 msgstr "by"
 
 #: app/templates/admin/interviews/list.html:57
-#: app/templates/admin/interviews/view.html:115
+#: app/templates/admin/interviews/view.html:127
 #: app/templates/admin/quizzes.html:58
 msgid "Groupes:"
 msgstr "Groups:"
@@ -4110,7 +4110,7 @@ msgstr "Next backup scheduled:"
 msgid "Derniere sauvegarde"
 msgstr "Last backup"
 
-#: app/templates/admin/interviews/view.html:181
+#: app/templates/admin/interviews/view.html:193
 #: app/templates/admin/settings.html:253 app/templates/admin/settings.html:576
 #: app/templates/admin/user_detail.html:89
 #: app/templates/admin/user_detail.html:146
@@ -4316,26 +4316,26 @@ msgid "Cet utilisateur n'a pas encore complete de quiz."
 msgstr "This user has not yet completed any quizzes."
 
 #: app/templates/admin/user_detail.html:144
-#: app/templates/interview/chat.html:205
+#: app/templates/interview/chat.html:267
 #: app/templates/interview/result.html:149
 #: app/templates/quiz/dashboard.html:229
 msgid "Entretien"
 msgstr "Interview"
 
 #: app/templates/admin/interviews/session.html:106
-#: app/templates/admin/interviews/view.html:183
+#: app/templates/admin/interviews/view.html:195
 #: app/templates/admin/user_detail.html:147
 #: app/templates/interview/result_pdf.html:185
 msgid "Echanges"
 msgstr "Exchanges"
 
 #: app/templates/admin/user_detail.html:158
-#: app/templates/interview/chat.html:268
+#: app/templates/interview/chat.html:347
 #: app/templates/interview/evaluating.html:97
 msgid "Erreur"
 msgstr "Error"
 
-#: app/templates/admin/interviews/view.html:228
+#: app/templates/admin/interviews/view.html:240
 #: app/templates/admin/user_detail.html:164
 msgid "Voir la session"
 msgstr "View the session"
@@ -4586,7 +4586,7 @@ msgid "Programme"
 msgstr "Program"
 
 #: app/templates/admin/interviews/list.html:69
-#: app/templates/admin/interviews/view.html:98
+#: app/templates/admin/interviews/view.html:110
 #: app/templates/interview/list.html:27
 msgid "Fichier requis"
 msgstr "Required file"
@@ -4639,7 +4639,7 @@ msgid "Re-evaluer"
 msgstr "Re-evaluate"
 
 #: app/templates/admin/interviews/session.html:111
-#: app/templates/admin/interviews/view.html:217
+#: app/templates/admin/interviews/view.html:229
 #: app/templates/interview/list.html:49
 msgid "Complete"
 msgstr "Complete"
@@ -4772,37 +4772,56 @@ msgstr "No"
 msgid "Fin auto IA"
 msgstr "AI auto-end"
 
-#: app/templates/admin/interviews/view.html:104
+#: app/templates/admin/interviews/view.html:97
+msgid "Lecture vocale"
+msgstr "Voice reading"
+
+#: app/templates/admin/interviews/view.html:100
+#: app/templates/admin/interviews/wizard.html:501
+msgid "Activee par defaut"
+msgstr "On by default"
+
+#: app/templates/admin/interviews/view.html:101
+#: app/templates/admin/interviews/wizard.html:498
+msgid "Proposee a l'apprenant"
+msgstr "Offered to the learner"
+
+#: app/templates/admin/interviews/view.html:102
+#: app/templates/admin/interviews/wizard.html:504
+msgid "Desactivee"
+msgstr "Off"
+
+#: app/templates/admin/interviews/view.html:116
 msgid "Disponibilite"
 msgstr "Availability"
 
-#: app/templates/admin/interviews/view.html:127
+#: app/templates/admin/interviews/view.html:139
 #: app/templates/admin/interviews/wizard.html:399
 msgid "Criteres d'evaluation"
 msgstr "Evaluation criteria"
 
-#: app/templates/admin/interviews/view.html:133
+#: app/templates/admin/interviews/view.html:145
 #: app/templates/interview/evaluating.html:94
 msgid "Critere"
 msgstr "Criteria"
 
-#: app/templates/admin/interviews/view.html:152
+#: app/templates/admin/interviews/view.html:164
 msgid "Total"
 msgstr "Total"
 
-#: app/templates/admin/interviews/view.html:159
+#: app/templates/admin/interviews/view.html:171
 msgid "Aucun critere defini"
 msgstr "No defined criteria"
 
-#: app/templates/admin/interviews/view.html:168
+#: app/templates/admin/interviews/view.html:180
 msgid "Sessions"
 msgstr "Sessions"
 
-#: app/templates/admin/interviews/view.html:232
+#: app/templates/admin/interviews/view.html:244
 msgid "cette session"
 msgstr "this session"
 
-#: app/templates/admin/interviews/view.html:246
+#: app/templates/admin/interviews/view.html:258
 msgid "Aucune session pour le moment"
 msgstr "No sessions at the moment"
 
@@ -5056,31 +5075,53 @@ msgstr "The character (bot)"
 msgid "Si le bot commence, il utilisera le message d'ouverture ci-dessous"
 msgstr "If the bot starts, it will use the opening message below."
 
-#: app/templates/admin/interviews/wizard.html:497
+#: app/templates/admin/interviews/wizard.html:493
+msgid "Lecture vocale des reponses du personnage"
+msgstr "Voice reading of the character's replies"
+
+#: app/templates/admin/interviews/wizard.html:511
+msgid "Voix (ex: Thomas, fr-CA)"
+msgstr "Voice (e.g. Daniel, en-GB)"
+
+#: app/templates/admin/interviews/wizard.html:516
+msgid "Vitesse"
+msgstr "Speed"
+
+#: app/templates/admin/interviews/wizard.html:520
+msgid ""
+"La voix est celle du navigateur de l'apprenant : aucun audio n'est envoye ni"
+" stocke. Laissez la voix vide pour celle de la langue de l'interface ; la "
+"vitesse va de 0,5 a 1,5."
+msgstr ""
+"The voice is the one in the learner's browser: no audio is sent or stored. "
+"Leave the voice empty to use the interface language's own voice; the speed "
+"ranges from 0.5 to 1.5."
+
+#: app/templates/admin/interviews/wizard.html:532
 msgid "Demander un fichier au debut"
 msgstr "Request a file at the beginning"
 
-#: app/templates/admin/interviews/wizard.html:499
+#: app/templates/admin/interviews/wizard.html:534
 msgid "Ex: CV pour simulation d'entretien d'embauche"
 msgstr "Example: CV for a mock job interview"
 
-#: app/templates/admin/interviews/wizard.html:505
+#: app/templates/admin/interviews/wizard.html:540
 msgid "Label du fichier"
 msgstr "File label"
 
-#: app/templates/admin/interviews/wizard.html:507
+#: app/templates/admin/interviews/wizard.html:542
 msgid "Votre CV"
 msgstr "Your CV"
 
-#: app/templates/admin/interviews/wizard.html:508
+#: app/templates/admin/interviews/wizard.html:543
 msgid "Ex: Votre CV, Votre dossier"
 msgstr "Example: Your CV, Your application"
 
-#: app/templates/admin/interviews/wizard.html:512
+#: app/templates/admin/interviews/wizard.html:547
 msgid "Instructions pour l'apprenant"
 msgstr "Instructions for the learner"
 
-#: app/templates/admin/interviews/wizard.html:514
+#: app/templates/admin/interviews/wizard.html:549
 msgid ""
 "Ex: Veuillez telecharger votre CV au format PDF ou texte. Il sera utilise "
 "comme base pour l'entretien."
@@ -5088,115 +5129,115 @@ msgstr ""
 "Example: Please upload your CV in PDF or text format. It will be used as a "
 "basis for the interview."
 
-#: app/templates/admin/interviews/wizard.html:517
+#: app/templates/admin/interviews/wizard.html:552
 msgid "Injection dans le prompt"
 msgstr "Injection into the prompt"
 
-#: app/templates/admin/interviews/wizard.html:519
+#: app/templates/admin/interviews/wizard.html:554
 msgid "Ex: Voici le CV du candidat que tu vas interviewer:"
 msgstr "Example: Here is the CV of the candidate you are going to interview:"
 
-#: app/templates/admin/interviews/wizard.html:523
+#: app/templates/admin/interviews/wizard.html:558
 msgid "Base tes questions sur ce CV."
 msgstr "Base your questions on this CV."
 
-#: app/templates/admin/interviews/wizard.html:523
+#: app/templates/admin/interviews/wizard.html:558
 msgid "Voici le document fourni par l'apprenant :"
 msgstr "Here is the document provided by the learner:"
 
-#: app/templates/admin/interviews/wizard.html:527
+#: app/templates/admin/interviews/wizard.html:562
 msgid "Utilise ces informations dans tes reponses et questions."
 msgstr "Use this information in your answers and questions."
 
-#: app/templates/admin/interviews/wizard.html:528
+#: app/templates/admin/interviews/wizard.html:563
 #, python-brace-format
 msgid "Utilisez {file_content} comme placeholder pour le contenu du fichier"
 msgstr "Use {file_content} as a placeholder for the file content"
 
-#: app/templates/admin/interviews/wizard.html:536
+#: app/templates/admin/interviews/wizard.html:571
 msgid "Generer le prompt"
 msgstr "Generate the prompt"
 
-#: app/templates/admin/interviews/wizard.html:539
+#: app/templates/admin/interviews/wizard.html:574
 msgid "Generer message d'ouverture"
 msgstr "Generate opening message"
 
-#: app/templates/admin/interviews/wizard.html:544
+#: app/templates/admin/interviews/wizard.html:579
 msgid "Message d'ouverture (optionnel)"
 msgstr "Opening message (optional)"
 
-#: app/templates/admin/interviews/wizard.html:546
+#: app/templates/admin/interviews/wizard.html:581
 msgid "Premier message du personnage pour demarrer la conversation..."
 msgstr "The character's first message to start the conversation..."
 
-#: app/templates/admin/interviews/wizard.html:550
+#: app/templates/admin/interviews/wizard.html:585
 msgid "Prompt systeme"
 msgstr "Prompt system"
 
-#: app/templates/admin/interviews/wizard.html:552
+#: app/templates/admin/interviews/wizard.html:587
 msgid "Cliquez sur 'Generer le prompt' ou ecrivez manuellement..."
 msgstr "Click on 'Generate prompt' or type manually..."
 
-#: app/templates/admin/interviews/wizard.html:553
+#: app/templates/admin/interviews/wizard.html:588
 msgid "Ce prompt definit le comportement de l'IA pendant l'entretien"
 msgstr "This prompt defines the AI's behavior during the interview"
 
-#: app/templates/admin/interviews/wizard.html:562
+#: app/templates/admin/interviews/wizard.html:597
 #: app/templates/quiz/take_exam.html:552
 msgid "Precedent"
 msgstr "Previous"
 
-#: app/templates/admin/interviews/wizard.html:565
+#: app/templates/admin/interviews/wizard.html:600
 #: app/templates/quiz/take_exam.html:556
 msgid "Suivant"
 msgstr "Following"
 
-#: app/templates/admin/interviews/wizard.html:568
+#: app/templates/admin/interviews/wizard.html:603
 msgid "Creer l'entretien"
 msgstr "Create the interview"
 
-#: app/templates/admin/interviews/wizard.html:653
+#: app/templates/admin/interviews/wizard.html:689
 msgid "Generation automatique du prompt..."
 msgstr "Automatic generation of the prompt..."
 
-#: app/templates/admin/interviews/wizard.html:755
+#: app/templates/admin/interviews/wizard.html:791
 msgid "Points max"
 msgstr "Max points"
 
-#: app/templates/admin/interviews/wizard.html:760
+#: app/templates/admin/interviews/wizard.html:796
 msgid "Indices d'evaluation (pour l'IA)"
 msgstr "Evaluation indices (for AI)"
 
-#: app/templates/admin/interviews/wizard.html:763
+#: app/templates/admin/interviews/wizard.html:799
 msgid "Ex: Chercher reformulations, questions ouvertes..."
 msgstr "Example: Look for reformulations, open-ended questions..."
 
-#: app/templates/admin/interviews/wizard.html:781
+#: app/templates/admin/interviews/wizard.html:817
 msgid "Remplacer les criteres actuels ?"
 msgstr "Replace the current criteria?"
 
-#: app/templates/admin/interviews/wizard.html:820
+#: app/templates/admin/interviews/wizard.html:856
 msgid "Erreur generation:"
 msgstr "Generation error:"
 
-#: app/templates/admin/interviews/wizard.html:824
-#: app/templates/admin/interviews/wizard.html:867
+#: app/templates/admin/interviews/wizard.html:860
+#: app/templates/admin/interviews/wizard.html:903
 msgid "Erreur de connexion:"
 msgstr "Connection error:"
 
-#: app/templates/admin/interviews/wizard.html:830
+#: app/templates/admin/interviews/wizard.html:866
 msgid "Generation du prompt en cours..."
 msgstr "Prompt generation in progress..."
 
-#: app/templates/admin/interviews/wizard.html:834
+#: app/templates/admin/interviews/wizard.html:870
 msgid "Erreur lors de la generation du prompt"
 msgstr "Error generating prompt"
 
-#: app/templates/admin/interviews/wizard.html:841
+#: app/templates/admin/interviews/wizard.html:877
 msgid "Generez d'abord le prompt systeme"
 msgstr "First, generate the system prompt."
 
-#: app/templates/admin/interviews/wizard.html:845
+#: app/templates/admin/interviews/wizard.html:881
 msgid "Generation du message d'ouverture..."
 msgstr "Generating the opening message..."
 
@@ -5995,50 +6036,67 @@ msgstr "The link is valid for 24 hours."
 msgid "Vous n'avez pas recu l'email ?"
 msgstr "You didn't receive the email?"
 
-#: app/templates/interview/chat.html:209
+#: app/templates/interview/chat.html:273 app/templates/interview/chat.html:274
+#: app/templates/interview/chat.html:354
+msgid "Lire les reponses a voix haute"
+msgstr "Read the replies aloud"
+
+#: app/templates/interview/chat.html:279
 #: app/templates/interview/result.html:159
 msgid "echanges"
 msgstr "exchanges"
 
-#: app/templates/interview/chat.html:217
+#: app/templates/interview/chat.html:288
 msgid "C'est a vous de commencer la conversation."
 msgstr "It's up to you to start the conversation."
 
-#: app/templates/interview/chat.html:241
+#: app/templates/interview/chat.html:302
+msgid "Reecouter ce message"
+msgstr "Play this message again"
+
+#: app/templates/interview/chat.html:302 app/templates/interview/chat.html:355
+msgid "Reecouter"
+msgstr "Play again"
+
+#: app/templates/interview/chat.html:320
 msgid "Ecrivez votre message... (Shift+Entree pour retour a la ligne)"
 msgstr "Write your message... (Shift+Enter for a line break)"
 
-#: app/templates/interview/chat.html:251
+#: app/templates/interview/chat.html:330
 msgid "Terminer l'entretien"
 msgstr "End the interview"
 
-#: app/templates/interview/chat.html:254
+#: app/templates/interview/chat.html:333
 msgid "Max"
 msgstr "Max"
 
-#: app/templates/interview/chat.html:254 app/templates/interview/list.html:24
+#: app/templates/interview/chat.html:333 app/templates/interview/list.html:24
 msgid "min"
 msgstr "min"
 
-#: app/templates/interview/chat.html:266
+#: app/templates/interview/chat.html:345
 msgid "Limite d'echanges atteinte"
 msgstr "Trading limit reached"
 
-#: app/templates/interview/chat.html:267 app/templates/interview/chat.html:271
+#: app/templates/interview/chat.html:346 app/templates/interview/chat.html:350
 msgid "Entretien termine"
 msgstr "Interview over"
 
-#: app/templates/interview/chat.html:270
+#: app/templates/interview/chat.html:349
 msgid "Terminer l'entretien ? Vous ne pourrez plus envoyer de messages."
 msgstr "End the interview? You will no longer be able to send messages."
 
-#: app/templates/interview/chat.html:272
+#: app/templates/interview/chat.html:351
 msgid "L'entretien est maintenant termine."
 msgstr "The interview is now over."
 
-#: app/templates/interview/chat.html:273
+#: app/templates/interview/chat.html:352
 msgid "Passer a l'analyse et la correction"
 msgstr "Moving on to analysis and correction"
+
+#: app/templates/interview/chat.html:353
+msgid "Couper la lecture vocale"
+msgstr "Turn the voice off"
 
 #: app/templates/interview/evaluating.html:3
 #: app/templates/interview/evaluating.html:65
@@ -6217,6 +6275,10 @@ msgstr "Start the interview"
 #: app/templates/interview/start.html:164
 msgid "min max"
 msgstr "min max"
+
+#: app/templates/interview/start.html:167
+msgid "reponses lues a voix haute"
+msgstr "replies read aloud"
 
 #: app/templates/quiz/dashboard.html:3 app/templates/quiz/dashboard.html:6
 msgid "Mon Tableau de Bord"

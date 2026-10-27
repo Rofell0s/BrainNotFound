@@ -162,6 +162,29 @@ Indices: Reformulations, silences respectueux, questions de clarification,
 - **Le personnage (bot)** : Utilise le message d'ouverture - ideal pour initier un contexte
 - **L'apprenant** : L'apprenant doit faire le premier pas - teste la prise d'initiative
 
+### Lecture vocale (optionnel)
+
+Les reponses du personnage peuvent etre lues a voix haute. La synthese se fait dans le
+navigateur de l'apprenant : aucun audio n'est envoye a un service externe ni stocke, et la
+qualite de la voix depend de son systeme (tres bonne sur macOS et iOS, plus mecanique sur
+Windows en francais).
+
+| Mode | Effet |
+|------|-------|
+| **Proposee a l'apprenant** | Un bouton haut-parleur dans l'entretien ; le choix de l'apprenant est retenu pour ses entretiens suivants |
+| **Activee par defaut** | La voix demarre activee : a reserver aux entretiens ou l'oral fait partie de l'exercice |
+| **Desactivee** | Aucun bouton, aucune lecture |
+
+| Champ | Exemple | Role |
+|-------|---------|------|
+| **Voix** | `Thomas`, `fr-CA` | Partie d'un nom de voix ou d'une langue ; vide = la voix de la langue de l'interface |
+| **Vitesse** | `0.9` | De 0,5 (lent) a 1,5 (rapide) |
+
+- Les didascalies entre asterisques (`*elle consulte votre CV*`) ne sont pas lues : elles
+  deviennent une pause.
+- L'historique n'est jamais lu a l'ouverture de la page ; l'apprenant peut reecouter un
+  message avec le bouton de sa bulle.
+
 ### Upload de fichier (optionnel)
 
 Permet de demander un document a l'apprenant avant l'entretien (ex: CV pour simulation de recrutement).
