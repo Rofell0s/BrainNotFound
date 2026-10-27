@@ -1,5 +1,6 @@
 """Server-side speech synthesis: configuration, audio route, cache and fallback."""
 import time
+from pathlib import Path
 
 import pytest
 
@@ -194,6 +195,37 @@ def test_the_purge_keeps_the_cache_under_its_ceiling(app, openai_provider, spoke
     assert not any(p.exists() for p in paths)
 
 
+def test_the_shipped_relative_cache_dir_resolves_absolutely(app, tmp_path, monkeypatch):
+    """The bug: writing resolved 'tts_cache' against the working directory (/app),
+    while send_file resolved it against app.root_path (/app/app). Every reply was
+    synthesized, paid for, written in one place and looked for in another, then
+    quietly replaced by the browser voice.
+    """
+    app.config['TTS_CACHE_DIR'] = 'tts_cache'   # the shipped default, relative
+    monkeypatch.chdir(tmp_path)                 # a different cwd must not move the cache
+
+    root = tts_cache.cache_root()
+
+    assert root.is_absolute()
+    assert root == Path(app.root_path).parent / 'tts_cache'
+    assert root != Path(app.root_path) / 'tts_cache'   # not the package directory
+    assert tts_cache.cache_root() == root              # and stable across calls
+
+
+def test_an_absolute_cache_dir_is_left_alone(app, tmp_path):
+    app.config['TTS_CACHE_DIR'] = str(tmp_path / 'ailleurs')
+    assert tts_cache.cache_root() == tmp_path / 'ailleurs'
+
+
+def test_the_writer_and_the_purge_use_the_same_directory(app, openai_provider, spoken, cache_dir):
+    path = tts_cache.audio_path('Bonjour.')
+    app.config['TTS_CACHE_MAX_MB'] = 0  # everything is over the ceiling
+
+    removed, _ = tts_cache.purge_audio_cache()
+
+    assert removed == 1 and not path.exists()
+
+
 def test_the_purge_survives_a_missing_directory(app):
     app.config['TTS_CACHE_DIR'] = 'does/not/exist'
     assert tts_cache.purge_audio_cache() == (0, 0)
@@ -257,6 +289,83 @@ def test_a_provider_failure_is_a_503_not_a_broken_interview(world, content, logi
 def test_without_a_provider_the_route_says_so(world, content, login, cache_dir):
     session, message = session_with_reply(content['itw_a'], world['eleve_3a'])
     assert login(world['eleve_3a']).get(audio_url(session, message)).status_code == 503
+
+
+# ==================== Admin: telling failures apart ====================
+
+def refuse(status, body=None):
+    """A provider answering with an HTTP error, as httpx reports it."""
+    import httpx
+
+    def raise_it(*args, **kwargs):
+        request = httpx.Request('GET', 'https://api.elevenlabs.io/v1/voices')
+        response = httpx.Response(status, request=request, json=body) if body is not None \
+            else httpx.Response(status, request=request)
+        raise httpx.HTTPStatusError(str(status), request=request, response=response)
+    return raise_it
+
+
+def list_voices(login, user, provider='elevenlabs'):
+    return login(user).post('/admin/settings/tts-voices', json={'provider': provider}).get_json()
+
+
+def test_a_refused_key_is_not_reported_as_unreachable(app, world, login, monkeypatch):
+    """A 401 sent the admin looking for a network problem that did not exist."""
+    monkeypatch.setattr(tts_client, 'list_voices', refuse(401))
+    data = list_voices(login, world['root'])
+
+    assert data['success'] is False
+    assert '401' in data['message']
+    assert 'refus' in data['message'].lower()
+    assert 'joindre' not in data['message'].lower()
+
+
+def test_the_provider_explanation_is_passed_through(app, world, login, monkeypatch):
+    """ElevenLabs names the missing permission; that sentence is the useful part."""
+    monkeypatch.setattr(tts_client, 'list_voices', refuse(401, {
+        'detail': {'status': 'missing_permissions',
+                   'message': 'The API key you used is missing the permission voices_read.'}}))
+    message = list_voices(login, world['root'])['message']
+
+    assert 'voices_read' in message
+    assert '401' in message
+
+
+def test_an_openai_style_error_body_is_read_too(app, world, login, monkeypatch):
+    monkeypatch.setattr(tts_client, 'list_voices', refuse(403, {
+        'error': {'message': 'Project does not have access to this model.'}}))
+    assert 'does not have access' in list_voices(login, world['root'])['message']
+
+
+def test_a_body_that_is_not_json_does_not_break_the_message(app, world, login, monkeypatch):
+    monkeypatch.setattr(tts_client, 'list_voices', refuse(401))
+    message = list_voices(login, world['root'])['message']
+    assert '401' in message and 'refus' in message.lower()
+
+
+def test_another_http_error_shows_its_status(app, world, login, monkeypatch):
+    monkeypatch.setattr(tts_client, 'list_voices', refuse(429))
+    assert '429' in list_voices(login, world['root'])['message']
+
+
+def test_an_unreachable_provider_says_so(app, world, login, monkeypatch):
+    import httpx
+
+    def unreachable(*args, **kwargs):
+        raise httpx.ConnectError('nope')
+
+    monkeypatch.setattr(tts_client, 'list_voices', unreachable)
+    assert 'joindre' in list_voices(login, world['root'])['message'].lower()
+
+
+def test_a_missing_key_is_a_configuration_problem(app, world, login):
+    # elevenlabs with nothing configured: TTSConfigError, not a network error
+    message = list_voices(login, world['root'])['message'].lower()
+    assert 'configuration' in message
+
+
+def test_listing_voices_is_superadmin_only(app, world, login, openai_provider):
+    assert login(world['dir_a']).post('/admin/settings/tts-voices', json={}).status_code in (302, 403)
 
 
 # ==================== The chat chooses its source ====================

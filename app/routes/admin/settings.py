@@ -160,12 +160,35 @@ def tts_settings_summary(settings):
     }
 
 
+def _provider_detail(response, limit=200):
+    """The provider's own explanation of an HTTP error, if it gave one.
+
+    ElevenLabs answers {"detail": {"status": "missing_permissions", "message": "..."}},
+    OpenAI {"error": {"message": "..."}}; anything else falls back to the raw body.
+    Truncated, since it is shown as-is in the admin.
+    """
+    try:
+        payload = response.json()
+    except Exception:
+        text = (getattr(response, 'text', '') or '').strip()
+        return text[:limit] or None
+    for value in (payload.get('detail'), payload.get('error')):
+        if isinstance(value, dict) and value.get('message'):
+            return str(value['message'])[:limit]
+        if isinstance(value, str) and value:
+            return value[:limit]
+    return None
+
+
 @admin_bp.route('/settings/tts-voices', methods=['POST'])
 @login_required
 @superadmin_required
 def tts_voices():
     """List a speech provider's voices (typed values or configured ones) - also tests the key."""
     from app.utils import tts_client
+
+    import httpx
+    import openai
 
     data = request.get_json(silent=True) or {}
     provider = data.get('provider') if data.get('provider') in tts_client.PROVIDERS else None
@@ -174,9 +197,23 @@ def tts_voices():
                                         data.get('base_url', '').strip() or None)
     except tts_client.TTSConfigError:
         return jsonify({'success': False, 'message': str(_l('Configuration incomplete (cle ou URL manquante)'))})
+    # A refused key and an unreachable server are two different problems, and saying
+    # "unable to reach" for a 401 sends the admin looking for the wrong one.
+    except (httpx.HTTPStatusError, openai.APIStatusError) as e:
+        status = e.response.status_code if isinstance(e, httpx.HTTPStatusError) else e.status_code
+        detail = _provider_detail(e.response)
+        if status in (401, 403):
+            message = str(_l('Cle API refusee par le fournisseur (HTTP %(status)s)', status=status))
+        else:
+            message = f'API error {status}'
+        # The provider explains itself better than we can ("missing the permission
+        # voices_read"), and that sentence is what the admin actually needs
+        return jsonify({'success': False, 'message': f'{message} - {detail}' if detail else message})
+    except (httpx.HTTPError, openai.APIConnectionError):
+        return jsonify({'success': False, 'message': str(_l('Impossible de joindre le fournisseur de voix'))})
     except Exception as e:
         current_app.logger.warning(f'Could not list speech voices: {e}')
-        return jsonify({'success': False, 'message': str(_l('Impossible de joindre le fournisseur de voix'))})
+        return jsonify({'success': False, 'message': str(_l('Echec de la liste des voix : %(error)s', error=e))})
     return jsonify({'success': True, 'voices': [{'id': v_id, 'name': name} for v_id, name in voices]})
 
 

@@ -20,9 +20,25 @@ from app.utils import tts_client
 logger = logging.getLogger(__name__)
 
 
+def cache_root():
+    """Absolute cache directory, whether TTS_CACHE_DIR is relative or not.
+
+    A relative path cannot be left as is: writing resolves it against the current
+    working directory (/app under gunicorn), while send_file resolves it against
+    app.root_path - the package directory, /app/app. The audio was written in one
+    place and looked for in another, and every reply fell back to the browser
+    voice after being paid for. Anchored on the project root, which is what
+    docker-compose bind-mounts as ./tts_cache.
+    """
+    configured = Path(current_app.config.get('TTS_CACHE_DIR', 'tts_cache'))
+    if configured.is_absolute():
+        return configured
+    return Path(current_app.root_path).parent / configured
+
+
 def cache_dir():
     """The cache directory, created on first use."""
-    path = Path(current_app.config.get('TTS_CACHE_DIR', 'tts_cache'))
+    path = cache_root()
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -64,7 +80,7 @@ def audio_path(text, voice=None):
 
 def purge_audio_cache():
     """Drop audio older than TTS_CACHE_MAX_DAYS, then the oldest until under TTS_CACHE_MAX_MB."""
-    directory = Path(current_app.config.get('TTS_CACHE_DIR', 'tts_cache'))
+    directory = cache_root()  # same resolution as the writer, or it would purge nothing
     if not directory.is_dir():
         return 0, 0
 
