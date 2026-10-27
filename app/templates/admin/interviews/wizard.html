@@ -225,7 +225,7 @@
         </li>
     </ul>
 
-    <form method="POST" id="interview-form">
+    <form method="POST" id="interview-form" onsubmit="checkBeforeSubmit(event)">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="criteria_json" id="criteria_json" value="{% if edit_mode %}{{ current_criteria }}{% else %}[]{% endif %}">
 
@@ -240,21 +240,21 @@
                         <div class="form-group">
                             <label class="form-label">{{ _('Titre') }} *</label>
                             <input type="text" name="title" class="form-input" required
-                                   value="{% if interview %}{{ interview.title }}{% endif %}"
+                                   value="{% if interview %}{{ interview.title or '' }}{% endif %}"
                                    placeholder="{{ _('Ex: Entretien RPS - Collegue en difficulte') }}">
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">{{ _('Description') }}</label>
                             <textarea name="description" class="form-textarea" rows="2"
-                                      placeholder="{{ _('Description visible par les apprenants') }}">{% if interview %}{{ interview.description }}{% endif %}</textarea>
+                                      placeholder="{{ _('Description visible par les apprenants') }}">{% if interview %}{{ interview.description or '' }}{% endif %}</textarea>
                         </div>
 
                         <div class="grid grid-cols-2 gap-md">
                             <div class="form-group">
                                 <label class="form-label">{{ _('Slug (URL)') }}</label>
                                 <input type="text" name="slug" class="form-input"
-                                       value="{% if interview %}{{ interview.slug }}{% endif %}"
+                                       value="{% if interview %}{{ interview.slug or '' }}{% endif %}"
                                        placeholder="{{ _('ex: rps-collegue') }}" pattern="[a-z0-9\-]+">
                                 <small class="text-light">{{ _('Lettres minuscules, chiffres et tirets uniquement') }}</small>
                             </div>
@@ -316,13 +316,13 @@
                             <div class="form-group">
                                 <label class="form-label">{{ _('Nom du personnage') }}</label>
                                 <input type="text" name="persona_name" class="form-input"
-                                       value="{% if interview %}{{ interview.persona_name }}{% endif %}"
+                                       value="{% if interview %}{{ interview.persona_name or '' }}{% endif %}"
                                        placeholder="{{ _('Ex: Marie Dupont') }}">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">{{ _('Role / Fonction') }}</label>
                                 <input type="text" name="persona_role" class="form-input"
-                                       value="{% if interview %}{{ interview.persona_role }}{% endif %}"
+                                       value="{% if interview %}{{ interview.persona_role or '' }}{% endif %}"
                                        placeholder="{{ _('Ex: Collegue developpeur') }}">
                             </div>
                         </div>
@@ -330,7 +330,7 @@
                         <div class="form-group">
                             <label class="form-label">{{ _('Contexte professionnel') }}</label>
                             <textarea name="persona_context" class="form-textarea" rows="3"
-                                      placeholder="{{ _('Ex: Travaille dans le meme service depuis 3 ans, connue pour etre tres impliquee...') }}">{% if interview %}{{ interview.persona_context }}{% endif %}</textarea>
+                                      placeholder="{{ _('Ex: Travaille dans le meme service depuis 3 ans, connue pour etre tres impliquee...') }}">{% if interview %}{{ interview.persona_context or '' }}{% endif %}</textarea>
                         </div>
                     </div>
                 </div>
@@ -346,13 +346,13 @@
                         <div class="form-group">
                             <label class="form-label">{{ _("Ce que l'apprenant sait au depart") }}</label>
                             <textarea name="student_context" class="form-textarea" rows="3"
-                                      placeholder="{{ _('Ex: Vous remarquez que votre collegue Marie semble fatiguee et distante depuis quelques semaines...') }}">{% if interview %}{{ interview.student_context }}{% endif %}</textarea>
+                                      placeholder="{{ _('Ex: Vous remarquez que votre collegue Marie semble fatiguee et distante depuis quelques semaines...') }}">{% if interview %}{{ interview.student_context or '' }}{% endif %}</textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">{{ _("Objectif de l'apprenant") }}</label>
                             <textarea name="student_objective" class="form-textarea" rows="2"
-                                      placeholder="{{ _("Ex: Engager une conversation bienveillante pour comprendre la situation et proposer de l'aide") }}">{% if interview %}{{ interview.student_objective }}{% endif %}</textarea>
+                                      placeholder="{{ _("Ex: Engager une conversation bienveillante pour comprendre la situation et proposer de l'aide") }}">{% if interview %}{{ interview.student_objective or '' }}{% endif %}</textarea>
                         </div>
                     </div>
                 </div>
@@ -368,25 +368,25 @@
                         <div class="form-group">
                             <label class="form-label">{{ _('Traits de personnalite') }}</label>
                             <textarea name="persona_personality" class="form-textarea" rows="3"
-                                      placeholder="{{ _("Ex: Reservee, perfectionniste, a tendance a minimiser ses problemes, s'ouvre progressivement si elle se sent en confiance...") }}">{% if interview %}{{ interview.persona_personality }}{% endif %}</textarea>
+                                      placeholder="{{ _("Ex: Reservee, perfectionniste, a tendance a minimiser ses problemes, s'ouvre progressivement si elle se sent en confiance...") }}">{% if interview %}{{ interview.persona_personality or '' }}{% endif %}</textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">{{ _('Ce que le personnage sait / pense') }}</label>
                             <textarea name="persona_knowledge" class="form-textarea" rows="3"
-                                      placeholder="{{ _("Ex: Elle sait qu'elle est en burnout mais refuse de l'admettre, elle a peur de passer pour faible...") }}">{% if interview %}{{ interview.persona_knowledge }}{% endif %}</textarea>
+                                      placeholder="{{ _("Ex: Elle sait qu'elle est en burnout mais refuse de l'admettre, elle a peur de passer pour faible...") }}">{% if interview %}{{ interview.persona_knowledge or '' }}{% endif %}</textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">{{ _('Objectifs caches du personnage') }}</label>
                             <textarea name="persona_objectives" class="form-textarea" rows="2"
-                                      placeholder="{{ _("Ex: Elle aimerait en parler mais attend qu'on lui tende la main de maniere bienveillante...") }}">{% if interview %}{{ interview.persona_objectives }}{% endif %}</textarea>
+                                      placeholder="{{ _("Ex: Elle aimerait en parler mais attend qu'on lui tende la main de maniere bienveillante...") }}">{% if interview %}{{ interview.persona_objectives or '' }}{% endif %}</textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">{{ _('Comportements declencheurs') }}</label>
                             <textarea name="persona_triggers" class="form-textarea" rows="3"
-                                      placeholder="{{ _("Ex: Se braque si on lui donne des conseils non sollicites, s'ouvre si on reformule ses emotions, devient defensive si on minimise...") }}">{% if interview %}{{ interview.persona_triggers }}{% endif %}</textarea>
+                                      placeholder="{{ _("Ex: Se braque si on lui donne des conseils non sollicites, s'ouvre si on reformule ses emotions, devient defensive si on minimise...") }}">{% if interview %}{{ interview.persona_triggers or '' }}{% endif %}</textarea>
                         </div>
                     </div>
                 </div>
@@ -516,7 +516,12 @@
                                            placeholder="{{ _('Voix du serveur (ex: nova)') }}">
                                 </div>
                                 <div class="form-group voice-option">
-                                    <input type="number" name="tts_rate" class="form-input" min="0.5" max="1.5" step="0.1"
+                                    <!-- step="any": (1.0 - 0.5) / 0.1 is 5.000000000000001 in floating
+                                         point, so a step of 0.1 can be read as a mismatch. The field is
+                                         hidden when the voice is off, and an invalid hidden control makes
+                                         the browser refuse the whole form in silence. The server clamps
+                                         the value anyway (apply_tts_settings). -->
+                                    <input type="number" name="tts_rate" class="form-input" min="0.5" max="1.5" step="any"
                                            value="{% if interview %}{{ interview.get_tts_rate() }}{% else %}1.0{% endif %}"
                                            placeholder="{{ _('Vitesse') }}">
                                 </div>
@@ -544,14 +549,14 @@
                                 <div class="form-group">
                                     <label class="form-label">{{ _('Label du fichier') }}</label>
                                     <input type="text" name="file_upload_label" class="form-input"
-                                           value="{% if interview and interview.file_upload_label %}{{ interview.file_upload_label }}{% else %}{{ _('Votre CV') }}{% endif %}"
+                                           value="{% if interview and interview.file_upload_label %}{{ interview.file_upload_label or '' }}{% else %}{{ _('Votre CV') }}{% endif %}"
                                            placeholder="{{ _('Ex: Votre CV, Votre dossier') }}">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">{{ _("Instructions pour l'apprenant") }}</label>
                                 <textarea name="file_upload_description" class="form-textarea" rows="2"
-                                          placeholder="{{ _("Ex: Veuillez telecharger votre CV au format PDF ou texte. Il sera utilise comme base pour l'entretien.") }}">{% if interview %}{{ interview.file_upload_description }}{% endif %}</textarea>
+                                          placeholder="{{ _("Ex: Veuillez telecharger votre CV au format PDF ou texte. Il sera utilise comme base pour l'entretien.") }}">{% if interview %}{{ interview.file_upload_description or '' }}{% endif %}</textarea>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">{{ _('Injection dans le prompt') }}</label>
@@ -560,7 +565,7 @@
 
 {file_content}
 
-{{ _('Base tes questions sur ce CV.') }}">{% if interview and interview.file_upload_prompt_injection %}{{ interview.file_upload_prompt_injection }}{% else %}{{ _("Voici le document fourni par l'apprenant :") }}
+{{ _('Base tes questions sur ce CV.') }}">{% if interview and interview.file_upload_prompt_injection %}{{ interview.file_upload_prompt_injection or '' }}{% else %}{{ _("Voici le document fourni par l'apprenant :") }}
 
 {file_content}
 
@@ -583,13 +588,13 @@
                         <div class="form-group">
                             <label class="form-label">{{ _("Message d'ouverture (optionnel)") }}</label>
                             <textarea name="opening_message" id="opening_message" class="form-textarea" rows="3"
-                                      placeholder="{{ _('Premier message du personnage pour demarrer la conversation...') }}">{% if interview %}{{ interview.opening_message }}{% endif %}</textarea>
+                                      placeholder="{{ _('Premier message du personnage pour demarrer la conversation...') }}">{% if interview %}{{ interview.opening_message or '' }}{% endif %}</textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">{{ _('Prompt systeme') }} *</label>
                             <textarea name="system_prompt" id="system_prompt" class="form-textarea" rows="15" required
-                                      placeholder="{{ _("Cliquez sur 'Generer le prompt' ou ecrivez manuellement...") }}">{% if interview %}{{ interview.system_prompt }}{% endif %}</textarea>
+                                      placeholder="{{ _("Cliquez sur 'Generer le prompt' ou ecrivez manuellement...") }}">{% if interview %}{{ interview.system_prompt or '' }}{% endif %}</textarea>
                             <small class="text-light">{{ _("Ce prompt definit le comportement de l'IA pendant l'entretien") }}</small>
                         </div>
                     </div>
@@ -694,6 +699,41 @@ async function autoGeneratePrompt() {
     showLoading('{{ _("Generation automatique du prompt...") }}');
     await generatePromptInternal();
     hideLoading();
+}
+
+// A required field left empty on an earlier step is on a hidden panel, and a
+// browser cannot focus what it cannot show: it then refuses to submit WITHOUT
+// any message, so the button looks dead. Take the check over, land on the step
+// that holds the problem, and say which field it is.
+function checkBeforeSubmit(event) {
+    const form = event.target;
+    if (form.checkValidity()) return;
+
+    event.preventDefault();
+    const field = form.querySelector(':invalid');
+    if (!field) return;
+
+    const panel = field.closest('.wizard-panel');
+    if (panel) setStep(parseInt(panel.dataset.panel));
+
+    const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.trim()
+        || field.name;
+    field.focus();
+    field.reportValidity();
+    showFormError(label);
+}
+
+function showFormError(label) {
+    let banner = document.getElementById('form-error');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'form-error';
+        banner.className = 'alert alert-error';
+        banner.style.margin = '1rem 0';
+        document.getElementById('interview-form').prepend(banner);
+    }
+    banner.textContent = '{{ _("Champ obligatoire a completer :") }} ' + label.replace(/\s*\*$/, '');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function setStep(step) {
